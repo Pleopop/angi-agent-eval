@@ -1,0 +1,126 @@
+diff --git a/ANGI.Application/Services/Agent/AgentOrchestrator.cs b/ANGI.Application/Services/Agent/AgentOrchestrator.cs
+index d769fd1..d72a413 100644
+--- a/ANGI.Application/Services/Agent/AgentOrchestrator.cs
++++ b/ANGI.Application/Services/Agent/AgentOrchestrator.cs
+@@ -281,6 +281,21 @@ public sealed class AgentOrchestrator(IAgentLlmService llm, AgentToolExecutor to
+                     telemetry.Record("pending_answer", context.ConversationId, context.TurnId, context.AttemptId, new { awaited = context.AwaitedAnswer, answer.Kind });
+                     return new(output.Reply, turnState, null, null, Answer: answer);
+                 }
++                // A save question is open and the model read the reply as neither yes, no nor "later" ("ok" to "which day?"): the question still stands,
++                // so a following "để sau" can answer it (pilot 2026-11-19, save-confirm). Nothing is changed or saved; the model's reply is shown as written.
++                if (context.AwaitedAnswer is AgentConfirmationPolicy.AwaitingSave or AgentConfirmationPolicy.AwaitingSaveDate &&
++                    output is { Action: "answer", PendingAnswer: "unclear", State: null, Items.Length: 0, Changes.Length: 0 })
++                {
++                    telemetry.Record("pending_answer", context.ConversationId, context.TurnId, context.AttemptId, new { awaited = context.AwaitedAnswer, Kind = "unclear" });
++                    return new(Raw(output.Reply), turnState, null, null, SaveUnclear);
++                }
++                // "Later" only answers the save-date question. With none open nothing is saved, though the model may have written that it saves the plan
++                // without a date: the user is told the truth instead of that claim (pilot 2026-11-19, V2 and V3 save-confirm).
++                if (output.PendingAnswer == AgentConfirmationPolicy.Defer)
++                {
++                    telemetry.Record("answer_without_question", context.ConversationId, context.TurnId, context.AttemptId, new { awaited = context.AwaitedAnswer, output.PendingAnswer });
++                    return new(AgentConfirmationPolicy.NotSaved, turnState, null, null, "answer");
++                }
+                 // Đồng ý mà không có câu hỏi nào đang chờ: lối đi an toàn là hỏi lại về việc lưu, vì bước đó chưa ghi gì; câu model viết có thể đã nói như thể việc đã xong ("Chốt nhé!").
+                 // Khi một câu hỏi làm rõ đang chờ, "đồng ý" là trả lời câu đó ("giữ nguyên" cho "muốn đổi món nào?"), không phải ý muốn lưu: câu model viết được hiện như thường.
+                 if (output.Action == "request_save")
+@@ -675,6 +690,9 @@ public sealed class AgentOrchestrator(IAgentLlmService llm, AgentToolExecutor to
+ 
+     // Người dùng chỉ thấy câu model viết; backend không có câu thay thế.
+     // A model sometimes escapes its line breaks twice, and the chat then shows "\n" as text (conversation 597): those become real line breaks.
++    /// <summary>The action of a turn that left an open save question unanswered; the use case keeps that question for the next turn.</summary>
++    public const string SaveUnclear = "save_unclear";
++
+     private static string Raw(string? reply) => (reply ?? "").Replace("\\r\\n", "\n", StringComparison.Ordinal).Replace("\\n", "\n", StringComparison.Ordinal).Trim();
+ 
+     /// <summary>Nhận state của model như nó viết. Chỉ chuẩn hóa tên tỉnh, ngân sách theo ngày, các trường backend sở hữu và chạy FluentValidation; không hỏi xác nhận khi nới điều kiện.</summary>
+diff --git a/ANGI.Application/UseCases/Agent/SendMessage/SendAgentMessageUseCase.cs b/ANGI.Application/UseCases/Agent/SendMessage/SendAgentMessageUseCase.cs
+index cea69a7..b321628 100644
+--- a/ANGI.Application/UseCases/Agent/SendMessage/SendAgentMessageUseCase.cs
++++ b/ANGI.Application/UseCases/Agent/SendMessage/SendAgentMessageUseCase.cs
+@@ -191,9 +191,9 @@ public sealed class SendAgentMessageUseCase(IValidator<SendAgentMessageRequestDt
+                             prepared = await SaveTurnAsync(conversation, userId, context, AgentConfirmationPolicy.SaveWish(context, today), ct, prepared.Reply);
+                         else telemetry.Record("save_skipped", id, message.TurnId, attemptId, new { reason = context.CurrentProposal?.Status == "ready" ? "plan_mismatch" : "no_ready_plan" });
+                     }
+-                    // Lời chào hay câu ngoài phạm vi không trả lời câu hỏi lưu nhưng cũng không hủy nó.
++                    // Lời chào, câu ngoài phạm vi hay một câu trả lời model chưa hiểu ("ok" cho câu hỏi ngày nào) không trả lời câu hỏi lưu nhưng cũng không hủy nó.
+                     // Vừa gợi ý món thì khác: "ok" tiếp theo là đáp lời mời đó, không được hiểu thành đồng ý lưu lịch.
+-                    else if (pendingSave is not null && prepared.State.DishOffered != true && prepared.Action is "chat" or "food_info" or "out_of_scope")
++                    else if (pendingSave is not null && prepared.State.DishOffered != true && prepared.Action is "chat" or "food_info" or "out_of_scope" or AgentOrchestrator.SaveUnclear)
+                         prepared = prepared with { State = prepared.State with { PendingSave = pendingSave } };
+                     // Lời mời gợi ý món cũng còn qua một câu chat, câu hỏi về món hay câu ngoài phạm vi chen giữa (hội thoại 220: "sở thích của tôi là gì"
+                     // rồi "tôi thích ăn cay"), để khẩu vị nói sau đó vẫn là về món vừa gợi ý. Lập lịch hay sửa lịch thì lời mời kết thúc.
+diff --git a/ANGI.Infrastructure/Services/Agent/OpenAiAgentLlmService.cs b/ANGI.Infrastructure/Services/Agent/OpenAiAgentLlmService.cs
+index e7f2d6d..9a9b80f 100644
+--- a/ANGI.Infrastructure/Services/Agent/OpenAiAgentLlmService.cs
++++ b/ANGI.Infrastructure/Services/Agent/OpenAiAgentLlmService.cs
+@@ -121,7 +121,7 @@ public sealed class OpenAiAgentLlmService(HttpClient http, IOptions<AiSettings>
+         Take these steps in this order. One message may settle several; ask only what is still missing, one step per reply, and never ask again for known values.
+         1. Place, with clarification=trip_details: ask where, mentioning that a province, an area, a day-by-day itinerary or the current location all work.
+         2. Duration and budget, with clarification=trip_details, while state.numDays is null: ask how many days, the start date if they know it, and how much budget in one question, saying the date and budget can be left open; when only the budget is missing, ask it once on its own. Never ask it again after the user answers or leaves it open. A province alone means the whole province: never ask for an area, a starting point or the current location.
+-        3. Once place and duration are known and the user wants a plan (asked for one, or is answering your trip questions), plan at once, with no question about taste: without a get_recommendation result in this turn yet, issue one scope=full with any taste, dish or itinerary the messages state (the saved taste profile covers the rest); once its result is above, never call it again: return create_proposal from it (over budget too). When budgetAmount=null, say plainly that the plan has no budget. When roadmapTrip gives the duration or start date and the user has not stated them in this chat, name them in the reply so they can correct them.
++        3. Once place and duration are known and the user wants a plan (asked for one, or is answering your trip questions), plan at once, with no question about taste, the start date or which meals: without a get_recommendation result in this turn yet, issue one scope=full with any taste, dish or itinerary the messages state (the saved taste profile covers the rest); once its result is above, never call it again: return create_proposal from it (over budget too). When budgetAmount=null, say plainly that the plan has no budget. When roadmapTrip gives the duration or start date and the user has not stated them in this chat, name them in the reply so they can correct them.
+         - Take the province only from the user's own words, never from state.title or a roadmap name. catalogProvinces lists where ANGI has restaurants: copy a province from it exactly. A province outside it has no restaurants on ANGI: keep state.province null, say ANGI has no data there yet and name the provinces in catalogProvinces.
+         - A district, street, landmark or day-by-day itinerary is a place, not a dish or restaurant: never pass one to search_catalog. Call locate_places once before your reply: tripArea for one area of the whole trip, otherwise stops, with place=null for a day with no fixed place ('ngày 3: tự do'). Never write coordinates. The backend stores what it finds in state.dayAreas or the origin fields and shows the user its own note about them above your reply, so do not repeat those places or the radius: go straight to the next step, ending with your question. Places in unresolved use the whole province; never ask for them again unless the user corrects them.
+         - state.province, numDays, startDate and budgetAmount may come from the roadmap the chat was opened on: they are known values, so never ask for them again. An itinerary naming fewer days does not shorten the trip unless the user says so, and one naming more days extends it; the backend's note says how the other days are chosen, and the user can correct it.
+@@ -261,7 +261,7 @@ public sealed class OpenAiAgentLlmService(HttpClient http, IOptions<AiSettings>
+ 
+         # Planning a new trip (hasPlan=false)
+         A message asking to plan with a taste is a trip in either order ('Lập lịch hộ tôi, tôi thích ăn cay', 'tôi thích ăn cay, lập lịch hộ tôi'); the taste belongs to the trip.
+-        Order: place, then duration, start date if known and budget in one question, then plan. A province alone means the whole province: never ask for an area, a starting point or the current location. Ask the budget once (with the duration when that is missing); the user may leave it open and it is never asked again. Once the place and duration are known, a wish to plan leaves nothing to ask: use_tool get_recommendation at once, never asking about taste. Province, numDays, startDate and budgetAmount already in state may come from the roadmap the chat was opened on: never ask for them on their own.
++        Order: place, then duration, start date if known and budget in one question, then plan. A province alone means the whole province: never ask for an area, a starting point or the current location. Ask the budget once (with the duration when that is missing); the user may leave it open and it is never asked again. Once the place and duration are known, a wish to plan leaves nothing to ask: use_tool get_recommendation at once, never asking about taste, the start date or which meals. Province, numDays, startDate and budgetAmount already in state may come from the roadmap the chat was opened on: never ask for them on their own.
+         - A dish the user wants with no day or meal ('tôi thích cà ri', 'phải có phở') is a meal request with day and meal null that the backend places: never ask which day or meal. A name covering several dishes ('cà ri') needs no choice either; the backend picks the best fit. One message may settle several steps; ask only what is still missing, one step per reply. Never ask a question you already asked and the user moved past: when they do not pick an option and go on ('không còn gì nữa', 'sao cũng được', 'tùy bạn'), take the broadest choice (whole province, whole trip) and continue.
+         - clarification: trip_details for place, and for duration with budget.
+         - Return a state with every value the user has stated so far, never state=null when something new was stated. Take the province only from the user's words, copied exactly from catalogProvinces when it is there. A province not in catalogProvinces has no restaurants on ANGI: keep state.province null, say ANGI has no data there yet and name the provinces in catalogProvinces. '3 ngày' sets numDays. Vague words ('vài ngày') set nothing.
+@@ -269,7 +269,7 @@ public sealed class OpenAiAgentLlmService(HttpClient http, IOptions<AiSettings>
+         - Taste levels: không=0, nhẹ=0.25, vừa=0.5, nhiều=0.75, rất nhiều=1, nothing else. Copy the user's words for each level into levelQuote. tasteTargets cover the whole trip; tasteOverrides are {dayNumber, mealSlot, targets}. A taste with no level ('tôi thích ăn cay', 'ưu tiên đồ cay') is vừa=0.5 with its words as levelQuote, and a taste with no scope covers the whole trip: never ask either.
+         - A medical condition with a trip request ('tôi bị tiểu đường, lập lịch…') is out_of_scope: no plan for a condition; offer to plan as usual without it.
+         - The current location in words with no coordinates in state: ask them to press 'Dùng vị trí hiện tại' or name a place. originMode pinned or gps means the place is known: never ask where, and keep the origin fields.
+-        - Ask the start date only inside the duration question, as optional; otherwise only when the user wants to save a plan without one (saveNeedsStartDate=true). pendingPlanningRequest holds the earlier messages of this request: read them with the current one as one request.
++        - Ask the start date only inside the duration question, as optional; a message that already gives the duration has no such question. Otherwise ask it only when the user wants to save a plan without one (saveNeedsStartDate=true). pendingPlanningRequest holds the earlier messages of this request: read them with the current one as one request.
+ 
+         # Editing a plan (hasPlan=true)
+         - A wish for new or unusual dishes ('món chưa ăn bao giờ', 'món lạ', 'món mới') whose meaning is not already 'different from this plan': clarification=novelty, asking whether they mean dishes they have never eaten (ANGI has no record of what they ate) or dishes different from this plan. When they choose 'never eaten', do not ask again: use_tool suggest_dish, whose dishes are never ones already in the plan, and the reply says ANGI has no record of what they ate, so these are dishes not in their plan.
+diff --git a/ANGI.UnitTests/Application/UseCases/Agent/SendMessage/SendAgentMessageUseCaseTests.cs b/ANGI.UnitTests/Application/UseCases/Agent/SendMessage/SendAgentMessageUseCaseTests.cs
+index 51c34be..5048bb0 100644
+--- a/ANGI.UnitTests/Application/UseCases/Agent/SendMessage/SendAgentMessageUseCaseTests.cs
++++ b/ANGI.UnitTests/Application/UseCases/Agent/SendMessage/SendAgentMessageUseCaseTests.cs
+@@ -436,6 +436,38 @@ public sealed class SendAgentMessageUseCaseTests
+         fixture.Conversation.RoadmapId.Should().BeNull();
+     }
+ 
++    // TEST-18: An unclear reply to the save-date question keeps the question open; "later" with no question open saves nothing and says so.
++    /// <summary>Pilot 2026-11-19: "chốt lịch này", "ok", "để sau" ended with "mình lưu lịch không kèm ngày" while nothing was saved.</summary>
++    [Theory]
++    [InlineData(true)]
++    [InlineData(false)]
++    public async Task ExecuteAsync_SaveDateQuestion_SurvivesUnclearReplyAndLaterNeedsIt(bool questionOpen)
++    {
++        // STEP-01: Create fixture with a ready proposal and, when questionOpen, an open question about the start date.
++        var fixture = new AgentUseCaseFixture(); fixture.Conversation.CurrentProposalId = 9;
++        var snapshot = AgentTestData.Snapshot(AgentTestData.Item());
++        fixture.Conversation.State = AgentJson.Write(snapshot.State with { PendingSave = questionOpen ? new(9, 1, AgentConfirmationPolicy.StageDate) : null });
++        var proposal = ReadyProposal(9, snapshot);
++        fixture.Repository.Setup(repo => repo.GetProposalSnapshotAsync(7, 9, It.IsAny<CancellationToken>())).ReturnsAsync(proposal);
++        fixture.Repository.Setup(repo => repo.GetProposalAsync(7, 9, It.IsAny<CancellationToken>())).ReturnsAsync(proposal);
++        // STEP-02: Stub the model with an unclear reading when the question is open, otherwise with "later" and a claim that the plan is saved.
++        var output = questionOpen
++            ? new AgentOutput { Action = "answer", PendingAnswer = "unclear", Reply = "Bạn cho mình biết ngày đi nhé, chưa biết thì nói “để sau”." }
++            : new AgentOutput { Action = "answer", PendingAnswer = AgentConfirmationPolicy.Defer, Reply = "Ừ, mình lưu lịch không kèm ngày nhé." };
++        fixture.Llm.Setup(llm => llm.RunAsync(It.IsAny<AgentContext>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(new AgentLlmStep([], output));
++        var request = Request(); request.Content = questionOpen ? "ok" : "để sau";
++
++        // STEP-03: Run Create().ExecuteAsync with request.
++        var turn = await Create(fixture).ExecuteAsync(7, request, CancellationToken.None);
++
++        // STEP-04: Assert nothing is saved, the open question is kept for the next turn, and a claim of saving never reaches the user.
++        turn.Commit.Should().BeNull();
++        proposal.Status.Should().Be(ANGI.Domain.Enums.AgentProposalStatus.Ready);
++        var state = AgentJson.Read<AgentState>(fixture.Conversation.State);
++        state.PendingSave.Should().Be(questionOpen ? new AgentPendingSave(9, 1, AgentConfirmationPolicy.StageDate) : null);
++        turn.Reply.Should().Be(questionOpen ? output.Reply : AgentConfirmationPolicy.NotSaved);
++    }
++
+     private static SendAgentMessageUseCase Create(AgentUseCaseFixture fixture) => new(new SendAgentMessageRequestDtoValidator(fixture.Limits),
+         fixture.Repository.Object, fixture.Roadmaps.Object, fixture.User.Object, fixture.UnitOfWork.Object, fixture.Clock, fixture.Limits,
+         new AgentContextBuilder(fixture.Repository.Object, fixture.Roadmaps.Object, fixture.Limits, fixture.Clock, AgentTestData.Validator().Tags.Object), fixture.Orchestrator(), fixture.Telemetry, fixture.Committer());

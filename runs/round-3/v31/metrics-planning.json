@@ -1,0 +1,33 @@
+{
+  "runId": "round-3/v31",
+  "scenarios": [
+    "plan-full",
+    "plan-taste",
+    "plan-intake",
+    "plan-tight",
+    "edit-swap",
+    "save-confirm"
+  ],
+  "v31": {
+    "scenarios": 12,
+    "passed": 12,
+    "setupFailed": 0,
+    "turns": 24,
+    "formatOkTurns": 24,
+    "faithfulTurns": 24,
+    "dishClaims": 0,
+    "dishClaimsVerified": 0,
+    "falseSaves": 0,
+    "calls": 57,
+    "inputTokens": 855441,
+    "cachedTokens": 612927,
+    "outputTokens": 19570,
+    "totalTokens": 875011,
+    "outputTokensPerScenario": 1630.8333333333333,
+    "tokensPerScenario": 72917.58333333333,
+    "turnMsMedian": 12447,
+    "turnMsP95": 20927,
+    "costUsd": 0.040166,
+    "costPerScenarioUsd": 0.003347
+  }
+}

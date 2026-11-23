@@ -1,0 +1,79 @@
+﻿{
+ "v11": {
+  "scenarios": 20,
+  "passed": 18,
+  "setupFailed": 0,
+  "turns": 40,
+  "formatOkTurns": 40,
+  "faithfulTurns": 40,
+  "dishClaims": 0,
+  "dishClaimsVerified": 0,
+  "falseSaves": 0,
+  "slotTurns": 0,
+  "proposalItems": 71,
+  "proposalItemsMismatched": 0,
+  "calls": 38,
+  "inputTokens": 343120,
+  "cachedTokens": 262023,
+  "outputTokens": 14330,
+  "totalTokens": 357450,
+  "outputTokensPerScenario": 716.5,
+  "tokensPerScenario": 17872.5,
+  "turnMsMedian": 2303,
+  "turnMsP95": 17569
+ },
+ "v20": {
+  "scenarios": 20,
+  "passed": 18,
+  "setupFailed": 0,
+  "turns": 32,
+  "formatOkTurns": 32,
+  "faithfulTurns": 31,
+  "dishClaims": 28,
+  "dishClaimsVerified": 28,
+  "falseSaves": 1,
+  "slotTurns": 0,
+  "proposalItems": 71,
+  "proposalItemsMismatched": 0,
+  "calls": 63,
+  "inputTokens": 682124,
+  "cachedTokens": 460911,
+  "outputTokens": 17582,
+  "totalTokens": 699706,
+  "outputTokensPerScenario": 879.1,
+  "tokensPerScenario": 34985.3,
+  "turnMsMedian": 6131,
+  "turnMsP95": 17812
+ },
+ "v30": {
+  "scenarios": 20,
+  "passed": 16,
+  "setupFailed": 2,
+  "turns": 37,
+  "formatOkTurns": 37,
+  "faithfulTurns": 36,
+  "dishClaims": 29,
+  "dishClaimsVerified": 29,
+  "falseSaves": 1,
+  "slotTurns": 0,
+  "proposalItems": 42,
+  "proposalItemsMismatched": 0,
+  "calls": 60,
+  "inputTokens": 717119,
+  "cachedTokens": 486402,
+  "outputTokens": 15625,
+  "totalTokens": 732744,
+  "outputTokensPerScenario": 781.25,
+  "tokensPerScenario": 36637.2,
+  "turnMsMedian": 3004,
+  "turnMsP95": 18525
+ }
+}
+v11 suggest-plain: reply misses expected wording
+v11 suggest-taste: reply misses expected wording
+v20 suggest-name: reply misses expected wording
+v30 plan-taste: proposal should be true
+v30 edit-remove [setup failed]: proposal should be true
+v30 save-confirm: committed should be true; turn 5: says it saved, nothing saved
+v20 save-confirm: committed should be true; turn 4: says it saved, nothing saved
+v30 save-interjection [setup failed]: proposal should be true

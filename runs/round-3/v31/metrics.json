@@ -1,0 +1,27 @@
+{
+  "v31": {
+    "scenarios": 16,
+    "passed": 16,
+    "setupFailed": 0,
+    "turns": 32,
+    "formatOkTurns": 32,
+    "faithfulTurns": 32,
+    "dishClaims": 0,
+    "dishClaimsVerified": 0,
+    "falseSaves": 0,
+    "slotTurns": 0,
+    "proposalItems": 136,
+    "proposalItemsMismatched": 0,
+    "calls": 86,
+    "inputTokens": 1357074,
+    "cachedTokens": 1019574,
+    "outputTokens": 29087,
+    "totalTokens": 1386161,
+    "outputTokensPerScenario": 1817.9375,
+    "tokensPerScenario": 86635.0625,
+    "turnMsMedian": 12924,
+    "turnMsP95": 21465,
+    "costUsd": 0.058489,
+    "costPerScenarioUsd": 0.003656
+  }
+}

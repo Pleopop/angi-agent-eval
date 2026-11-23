@@ -1,0 +1,79 @@
+﻿{
+ "v11": {
+  "scenarios": 4,
+  "passed": 1,
+  "setupFailed": 0,
+  "turns": 12,
+  "formatOkTurns": 12,
+  "faithfulTurns": 12,
+  "dishClaims": 0,
+  "dishClaimsVerified": 0,
+  "falseSaves": 0,
+  "slotTurns": 0,
+  "proposalItems": 31,
+  "proposalItemsMismatched": 0,
+  "calls": 20,
+  "inputTokens": 225150,
+  "cachedTokens": 154123,
+  "outputTokens": 6919,
+  "totalTokens": 232069,
+  "outputTokensPerScenario": 1729.75,
+  "tokensPerScenario": 58017.25,
+  "turnMsMedian": 4249,
+  "turnMsP95": 16860
+ },
+ "v20": {
+  "scenarios": 4,
+  "passed": 2,
+  "setupFailed": 0,
+  "turns": 11,
+  "formatOkTurns": 11,
+  "faithfulTurns": 11,
+  "dishClaims": 0,
+  "dishClaimsVerified": 0,
+  "falseSaves": 0,
+  "slotTurns": 0,
+  "proposalItems": 51,
+  "proposalItemsMismatched": 0,
+  "calls": 32,
+  "inputTokens": 447417,
+  "cachedTokens": 342791,
+  "outputTokens": 9676,
+  "totalTokens": 457093,
+  "outputTokensPerScenario": 2419,
+  "tokensPerScenario": 114273.25,
+  "turnMsMedian": 13560,
+  "turnMsP95": 21015
+ },
+ "v30": {
+  "scenarios": 4,
+  "passed": 1,
+  "setupFailed": 2,
+  "turns": 10,
+  "formatOkTurns": 10,
+  "faithfulTurns": 10,
+  "dishClaims": 0,
+  "dishClaimsVerified": 0,
+  "falseSaves": 0,
+  "slotTurns": 0,
+  "proposalItems": 26,
+  "proposalItemsMismatched": 0,
+  "calls": 22,
+  "inputTokens": 338246,
+  "cachedTokens": 263508,
+  "outputTokens": 6278,
+  "totalTokens": 344524,
+  "outputTokensPerScenario": 1569.5,
+  "tokensPerScenario": 86131,
+  "turnMsMedian": 2743,
+  "turnMsP95": 19408
+ }
+}
+v11 edit-add-dish: turn 3: newProposal should be true
+v20 edit-add-dish: draft check: the added dish replaced an existing one
+v30 edit-add-dish [setup failed]: proposal should be true
+v11 edit-add-meal: turn 3: newProposal should be true
+v20 edit-add-dish: draft check: the added dish replaced an existing one
+v30 edit-add-dish: draft check: the added dish replaced an existing one
+v11 edit-add-dish: turn 3: newProposal should be true
+v30 edit-add-meal [setup failed]: proposal should be true

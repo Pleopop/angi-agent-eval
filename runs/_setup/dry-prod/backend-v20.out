@@ -1,0 +1,2407 @@
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (26ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT migration_id, product_version
+      FROM core."__EFMigrationsHistory"
+      ORDER BY migration_id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      DO $EF$
+      BEGIN
+          IF NOT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = 'core') THEN
+              CREATE SCHEMA core;
+          END IF;
+      END $EF$;
+      CREATE TABLE IF NOT EXISTS core."__EFMigrationsHistory" (
+          migration_id character varying(150) NOT NULL,
+          product_version character varying(32) NOT NULL,
+          CONSTRAINT pk___ef_migrations_history PRIMARY KEY (migration_id)
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      LOCK TABLE core."__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT migration_id, product_version
+      FROM core."__EFMigrationsHistory"
+      ORDER BY migration_id;
+info: Microsoft.EntityFrameworkCore.Migrations[20405]
+      No migrations were applied. The database is already up to date.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs SET status = 'queued' WHERE status = 'running'
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5202
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: E:\ANGI-Agent-Eval\build\v20
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (18ms) [Parameters=[p0='?' (DbType = DateTime), p1='?' (DbType = DateTime), p2='?' (DbType = DateTime), p3='?' (DbType = DateTime), p4='?' (DbType = DateTime), p5='?' (DbType = DateTime), p6='?' (DbType = DateTime), p7='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      SELECT * FROM core.agent_conversations
+      WHERE (processing_until IS NULL OR processing_until <= @p0)
+        AND ((status = 'active' AND expires_at <= @p1)
+          OR (status <> 'active' AND updated_at <= @p2 AND
+              (roadmap_id IS NULL OR state <> jsonb_build_object() OR current_proposal_id IS NOT NULL))
+          OR EXISTS (SELECT 1 FROM core.agent_messages m WHERE m.conversation_id = agent_conversations.id AND m.created_at < @p3
+              AND NOT EXISTS (SELECT 1 FROM core.agent_messages u
+                  CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(NULLIF(u.payload->'attempts', 'null'::jsonb), '[]'::jsonb)) a(value)
+                  WHERE u.conversation_id = m.conversation_id AND u.turn_id = m.turn_id AND a.value::timestamptz >= @p4))
+          OR EXISTS (SELECT 1 FROM core.agent_proposals p WHERE p.conversation_id = agent_conversations.id
+              AND p.created_at < @p5 AND p.id IS DISTINCT FROM current_proposal_id
+              AND NOT EXISTS (SELECT 1 FROM core.agent_messages m WHERE m.conversation_id = p.conversation_id
+                  AND m.response_payload->'proposal'->>'proposalId' = CAST(p.id AS text)
+                  AND (m.created_at >= @p6 OR EXISTS (
+                      SELECT 1 FROM jsonb_array_elements_text(COALESCE(NULLIF(m.payload->'attempts', 'null'::jsonb), '[]'::jsonb)) a(value)
+                      WHERE a.value::timestamptz >= @p7)))))
+      ORDER BY updated_at, id LIMIT 100 FOR UPDATE SKIP LOCKED
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (22ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.avatar_media_id, a.bio, a.created_at, a.deleted_at, a.display_name, a.email, a.email_verified_at, a.last_login_at, a.password_hash, a.phone, a.role_id, a.status, a.suspended_until, a.updated_at
+      FROM (
+          SELECT * FROM core.users WHERE status = 'suspended' AND suspended_until <= @p0 AND deleted_at IS NULL ORDER BY id LIMIT 100 FOR UPDATE SKIP LOCKED
+      ) AS a
+      WHERE a.deleted_at IS NULL
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (7ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (7ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (7ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (7ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[@normalizedEmail='?'], CommandType='Text', CommandTimeout='30']
+      SELECT u.id, u.avatar_media_id, u.bio, u.created_at, u.deleted_at, u.display_name, u.email, u.email_verified_at, u.last_login_at, u.password_hash, u.phone, u.role_id, u.status, u.suspended_until, u.updated_at, r.id, r.code, r.name, m.id, m.created_at, m.mime_type, m.size_bytes, m.storage_key, m.uploader_id, m.url
+      FROM core.users AS u
+      INNER JOIN core.roles AS r ON u.role_id = r.id
+      LEFT JOIN core.media_files AS m ON u.avatar_media_id = m.id
+      WHERE u.deleted_at IS NULL AND u.email = @normalizedEmail
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[@p0='?', @p1='?' (DbType = Int32), @p2='?', @p3='?' (DbType = DateTime), @p4='?' (DbType = Int64), @p5='?', @p6='?' (DbType = Object), @p7='?' (DbType = Object), @p8='?' (DbType = Object), @p9='?' (DbType = Int32), @p10='?', @p11='?' (DbType = DateTime), @p12='?' (DbType = DateTime), @p13='?' (DbType = Object), @p14='?', @p15='?' (DbType = Int64), @p16='?' (DbType = DateTime), @p17='?', @p18='?' (DbType = Int32), @p21='?' (DbType = Int32), @p19='?' (DbType = DateTime), @p20='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.audit_logs (action, actor_id, actor_role, created_at, entity_id, entity_type, ip_address, new_values, old_values, subject_user_id, user_agent)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10)
+      RETURNING id;
+      INSERT INTO core.user_sessions (created_at, expires_at, ip_address, refresh_token_hash, replaced_by_session_id, revoked_at, user_agent, user_id)
+      VALUES (@p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18)
+      RETURNING id;
+      UPDATE core.users SET last_login_at = @p19, updated_at = @p20
+      WHERE id = @p21;
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:18112/users/511/survey
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:18112/users/511/survey
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[104]
+      HTTP request failed after 54.3045ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|115_0(HttpRequestMessage request, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[104]
+      HTTP request failed after 68.6958ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|115_0(HttpRequestMessage request, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+warn: ANGI.Infrastructure.Services.Recommendation.RecommendationService[0]
+      RECO-09 could not be reached.
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|115_0(HttpRequestMessage request, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ANGI.Infrastructure.Services.Recommendation.RecommendationService.SendAsync(HttpMethod method, String path, Object body, String endpointId, CancellationToken ct, Nullable`1 timeoutMilliseconds) in E:\ANGI-Agent-Eval\src\v20\ANGI.Infrastructure\Services\Recommendation\RecommendationService.cs:line 285
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@userId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT u.status, u.suspended_until
+      FROM core.users AS u
+      WHERE u.deleted_at IS NULL AND u.id = @userId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (DbType = Int32), @p5='?' (DbType = Int64), @p6='?' (DbType = Int64), @p7='?' (DbType = DateTime), @p8='?' (DbType = Int64), @p9='?' (DbType = Int64), @p10='?' (DbType = Object), @p11='?', @p12='?' (DbType = DateTime), @p13='?' (DbType = Int32), @p14='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.agent_conversations (created_at, current_proposal_id, expires_at, last_message_sequence, last_proposal_version, processing_attempt_id, processing_turn_id, processing_until, purged_client_message_id, roadmap_id, state, status, updated_at, user_id, version)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int64), @p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.agent_conversations WHERE id = @p0 AND user_id = @p1 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@id='?' (DbType = Int64), @userId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @id AND a.user_id = @userId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64), @clientMessageId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.client_message_id, a.conversation_id, a.created_at, a.payload, a.processing_status, a.request_hash, a.response_payload, a.role, a.sequence_no, a.turn_id
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId AND a.client_message_id = @clientMessageId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.users WHERE id = @p0 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      SELECT s."Value"
+      FROM (
+          SELECT count(*)::integer AS "Value"
+          FROM core.agent_messages m JOIN core.agent_conversations c ON c.id = m.conversation_id
+          CROSS JOIN LATERAL jsonb_array_elements_text(m.payload->'attempts') a(value)
+          WHERE c.user_id = @p0 AND m.role = 'user' AND a.value::timestamptz >= @p1
+      ) AS s
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      SELECT s."Value"
+      FROM (
+          SELECT count(*)::integer AS "Value"
+          FROM core.agent_messages m JOIN core.agent_conversations c ON c.id = m.conversation_id
+          CROSS JOIN LATERAL jsonb_array_elements_text(m.payload->'attempts') a(value)
+          WHERE c.user_id = @p0 AND m.role = 'user' AND a.value::timestamptz >= @p1
+      ) AS s
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @conversationId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT max(a.sequence_no)
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p7='?' (DbType = Int64), @p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?' (DbType = Int64), @p3='?' (DbType = Int64), @p4='?' (DbType = DateTime), @p5='?' (DbType = DateTime), @p6='?' (DbType = Int64), @p8='?' (DbType = Int64), @p9='?' (DbType = Int64), @p10='?' (DbType = Int64), @p11='?' (DbType = DateTime), @p12='?' (DbType = Object), @p13='?', @p14='?', @p15='?' (DbType = Object), @p16='?', @p17='?' (DbType = Int32), @p18='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.agent_conversations SET expires_at = @p0, last_message_sequence = @p1, processing_attempt_id = @p2, processing_turn_id = @p3, processing_until = @p4, updated_at = @p5, version = @p6
+      WHERE id = @p7 AND version = @p8;
+      INSERT INTO core.agent_messages (client_message_id, conversation_id, created_at, payload, processing_status, request_hash, response_payload, role, sequence_no, turn_id)
+      VALUES (@p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18)
+      RETURNING id;
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent claimed correlationId=c204e825c2939e00dc2e8c2b541e57f2 conversationId=3 turnId=1 attemptId=2 data=(null)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64), @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.client_message_id, a.conversation_id, a.created_at, a.payload, a.processing_status, a.request_hash, a.response_payload, a.role, a.sequence_no, a.turn_id
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId AND a.role <> 'tool' AND EXISTS (
+          SELECT 1
+          FROM core.agent_messages AS a0
+          WHERE a0.conversation_id = @conversationId AND a0.turn_id = a.turn_id AND a0.role = 'user' AND a0.processing_status = 'completed')
+      ORDER BY a.sequence_no DESC
+      LIMIT @p
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:18112/users/511/preferences
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:18112/users/511/preferences
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[104]
+      HTTP request failed after 10.7701ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[104]
+      HTTP request failed after 11.2543ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+warn: ANGI.Infrastructure.Services.Recommendation.RecommendationService[0]
+      RECO-PREFERENCES could not be reached.
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ANGI.Infrastructure.Services.Recommendation.RecommendationService.SendAsync(HttpMethod method, String path, Object body, String endpointId, CancellationToken ct, Nullable`1 timeoutMilliseconds) in E:\ANGI-Agent-Eval\src\v20\ANGI.Infrastructure\Services\Recommendation\RecommendationService.cs:line 285
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT t.id, t.code, t.name, t.tag_type
+      FROM core.tags AS t
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT DISTINCT r.province_name
+      FROM core.restaurants AS r
+      WHERE r.deleted_at IS NULL AND r.verification_status = 'verified' AND r.moderation_status = 'visible' AND r.province_name IS NOT NULL
+info: System.Net.Http.HttpClient.IAgentLlmService.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:18100/run/v20/v1/chat/completions
+info: System.Net.Http.HttpClient.IAgentLlmService.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:18100/run/v20/v1/chat/completions
+info: System.Net.Http.HttpClient.IAgentLlmService.ClientHandler[101]
+      Received HTTP response headers after 50.5291ms - 200
+info: System.Net.Http.HttpClient.IAgentLlmService.LogicalHandler[101]
+      End processing HTTP request after 55.0447ms - 200
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent llm correlationId=c204e825c2939e00dc2e8c2b541e57f2 conversationId=3 turnId=1 attemptId=2 data={"elapsedMs":122.1265,"Tokens":9490,"CachedTokens":0,"callNumber":1,"repair":false,"MaxOutputTokens":16000,"ReasoningEffort":"none","schemaRepaired":false,"proposalRepaired":false,"emptyRepaired":false,"coverageRepaired":false,"failureKind":null,"HttpStatus":null,"RetryAfterSeconds":null,"ProviderCode":null,"Reason":null}
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent model_output correlationId=c204e825c2939e00dc2e8c2b541e57f2 conversationId=3 turnId=1 attemptId=2 data={"phase":"Read","Action":"chat","Clarification":null,"Tool":null,"PendingAnswer":null,"replyLength":37}
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent chat correlationId=c204e825c2939e00dc2e8c2b541e57f2 conversationId=3 turnId=1 attemptId=2 data=(null)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int64), @p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.agent_conversations WHERE id = @p0 AND user_id = @p1 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @p
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@id='?' (DbType = Int64), @userId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @id AND a.user_id = @userId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @conversationId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT max(a.sequence_no)
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@p8='?' (DbType = Int64), @p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?' (DbType = Int64), @p3='?' (DbType = Int64), @p4='?' (DbType = DateTime), @p5='?' (DbType = Object), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int64), @p9='?' (DbType = Int64), @p12='?' (DbType = Int64), @p10='?', @p11='?' (DbType = Object), @p13='?' (DbType = Int64), @p14='?' (DbType = Int64), @p15='?' (DbType = DateTime), @p16='?' (DbType = Object), @p17='?', @p18='?', @p19='?' (DbType = Object), @p20='?', @p21='?' (DbType = Int32), @p22='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.agent_conversations SET expires_at = @p0, last_message_sequence = @p1, processing_attempt_id = @p2, processing_turn_id = @p3, processing_until = @p4, state = @p5, updated_at = @p6, version = @p7
+      WHERE id = @p8 AND version = @p9;
+      UPDATE core.agent_messages SET processing_status = @p10, response_payload = @p11
+      WHERE id = @p12;
+      INSERT INTO core.agent_messages (client_message_id, conversation_id, created_at, payload, processing_status, request_hash, response_payload, role, sequence_no, turn_id)
+      VALUES (@p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20, @p21, @p22)
+      RETURNING id;
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent completed correlationId=c204e825c2939e00dc2e8c2b541e57f2 conversationId=3 turnId=1 attemptId=2 data={"proposalVersion":null}
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[@normalizedEmail='?'], CommandType='Text', CommandTimeout='30']
+      SELECT u.id, u.avatar_media_id, u.bio, u.created_at, u.deleted_at, u.display_name, u.email, u.email_verified_at, u.last_login_at, u.password_hash, u.phone, u.role_id, u.status, u.suspended_until, u.updated_at, r.id, r.code, r.name, m.id, m.created_at, m.mime_type, m.size_bytes, m.storage_key, m.uploader_id, m.url
+      FROM core.users AS u
+      INNER JOIN core.roles AS r ON u.role_id = r.id
+      LEFT JOIN core.media_files AS m ON u.avatar_media_id = m.id
+      WHERE u.deleted_at IS NULL AND u.email = @normalizedEmail
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@p0='?', @p1='?' (DbType = Int32), @p2='?', @p3='?' (DbType = DateTime), @p4='?' (DbType = Int64), @p5='?', @p6='?' (DbType = Object), @p7='?' (DbType = Object), @p8='?' (DbType = Object), @p9='?' (DbType = Int32), @p10='?', @p11='?' (DbType = DateTime), @p12='?' (DbType = DateTime), @p13='?' (DbType = Object), @p14='?', @p15='?' (DbType = Int64), @p16='?' (DbType = DateTime), @p17='?', @p18='?' (DbType = Int32), @p21='?' (DbType = Int32), @p19='?' (DbType = DateTime), @p20='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.audit_logs (action, actor_id, actor_role, created_at, entity_id, entity_type, ip_address, new_values, old_values, subject_user_id, user_agent)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10)
+      RETURNING id;
+      INSERT INTO core.user_sessions (created_at, expires_at, ip_address, refresh_token_hash, replaced_by_session_id, revoked_at, user_agent, user_id)
+      VALUES (@p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18)
+      RETURNING id;
+      UPDATE core.users SET last_login_at = @p19, updated_at = @p20
+      WHERE id = @p21;
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:18112/users/511/survey
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:18112/users/511/survey
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[104]
+      HTTP request failed after 7.671ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[104]
+      HTTP request failed after 8.1313ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+warn: ANGI.Infrastructure.Services.Recommendation.RecommendationService[0]
+      RECO-09 could not be reached.
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ANGI.Infrastructure.Services.Recommendation.RecommendationService.SendAsync(HttpMethod method, String path, Object body, String endpointId, CancellationToken ct, Nullable`1 timeoutMilliseconds) in E:\ANGI-Agent-Eval\src\v20\ANGI.Infrastructure\Services\Recommendation\RecommendationService.cs:line 285
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (DbType = Int32), @p5='?' (DbType = Int64), @p6='?' (DbType = Int64), @p7='?' (DbType = DateTime), @p8='?' (DbType = Int64), @p9='?' (DbType = Int64), @p10='?' (DbType = Object), @p11='?', @p12='?' (DbType = DateTime), @p13='?' (DbType = Int32), @p14='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.agent_conversations (created_at, current_proposal_id, expires_at, last_message_sequence, last_proposal_version, processing_attempt_id, processing_turn_id, processing_until, purged_client_message_id, roadmap_id, state, status, updated_at, user_id, version)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int64), @p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.agent_conversations WHERE id = @p0 AND user_id = @p1 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@id='?' (DbType = Int64), @userId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @id AND a.user_id = @userId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64), @clientMessageId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.client_message_id, a.conversation_id, a.created_at, a.payload, a.processing_status, a.request_hash, a.response_payload, a.role, a.sequence_no, a.turn_id
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId AND a.client_message_id = @clientMessageId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.users WHERE id = @p0 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      SELECT s."Value"
+      FROM (
+          SELECT count(*)::integer AS "Value"
+          FROM core.agent_messages m JOIN core.agent_conversations c ON c.id = m.conversation_id
+          CROSS JOIN LATERAL jsonb_array_elements_text(m.payload->'attempts') a(value)
+          WHERE c.user_id = @p0 AND m.role = 'user' AND a.value::timestamptz >= @p1
+      ) AS s
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      SELECT s."Value"
+      FROM (
+          SELECT count(*)::integer AS "Value"
+          FROM core.agent_messages m JOIN core.agent_conversations c ON c.id = m.conversation_id
+          CROSS JOIN LATERAL jsonb_array_elements_text(m.payload->'attempts') a(value)
+          WHERE c.user_id = @p0 AND m.role = 'user' AND a.value::timestamptz >= @p1
+      ) AS s
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @conversationId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT max(a.sequence_no)
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p7='?' (DbType = Int64), @p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?' (DbType = Int64), @p3='?' (DbType = Int64), @p4='?' (DbType = DateTime), @p5='?' (DbType = DateTime), @p6='?' (DbType = Int64), @p8='?' (DbType = Int64), @p9='?' (DbType = Int64), @p10='?' (DbType = Int64), @p11='?' (DbType = DateTime), @p12='?' (DbType = Object), @p13='?', @p14='?', @p15='?' (DbType = Object), @p16='?', @p17='?' (DbType = Int32), @p18='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.agent_conversations SET expires_at = @p0, last_message_sequence = @p1, processing_attempt_id = @p2, processing_turn_id = @p3, processing_until = @p4, updated_at = @p5, version = @p6
+      WHERE id = @p7 AND version = @p8;
+      INSERT INTO core.agent_messages (client_message_id, conversation_id, created_at, payload, processing_status, request_hash, response_payload, role, sequence_no, turn_id)
+      VALUES (@p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18)
+      RETURNING id;
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent claimed correlationId=13b72f9451c380ff88d088112a9c84e3 conversationId=4 turnId=1 attemptId=2 data=(null)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64), @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.client_message_id, a.conversation_id, a.created_at, a.payload, a.processing_status, a.request_hash, a.response_payload, a.role, a.sequence_no, a.turn_id
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId AND a.role <> 'tool' AND EXISTS (
+          SELECT 1
+          FROM core.agent_messages AS a0
+          WHERE a0.conversation_id = @conversationId AND a0.turn_id = a.turn_id AND a0.role = 'user' AND a0.processing_status = 'completed')
+      ORDER BY a.sequence_no DESC
+      LIMIT @p
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:18112/users/511/preferences
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:18112/users/511/preferences
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[104]
+      HTTP request failed after 7.0173ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[104]
+      HTTP request failed after 7.4536ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+warn: ANGI.Infrastructure.Services.Recommendation.RecommendationService[0]
+      RECO-PREFERENCES could not be reached.
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ANGI.Infrastructure.Services.Recommendation.RecommendationService.SendAsync(HttpMethod method, String path, Object body, String endpointId, CancellationToken ct, Nullable`1 timeoutMilliseconds) in E:\ANGI-Agent-Eval\src\v20\ANGI.Infrastructure\Services\Recommendation\RecommendationService.cs:line 285
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT t.id, t.code, t.name, t.tag_type
+      FROM core.tags AS t
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT DISTINCT r.province_name
+      FROM core.restaurants AS r
+      WHERE r.deleted_at IS NULL AND r.verification_status = 'verified' AND r.moderation_status = 'visible' AND r.province_name IS NOT NULL
+info: System.Net.Http.HttpClient.IAgentLlmService.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:18100/run/v20/v1/chat/completions
+info: System.Net.Http.HttpClient.IAgentLlmService.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:18100/run/v20/v1/chat/completions
+info: System.Net.Http.HttpClient.IAgentLlmService.ClientHandler[101]
+      Received HTTP response headers after 4.9395ms - 200
+info: System.Net.Http.HttpClient.IAgentLlmService.LogicalHandler[101]
+      End processing HTTP request after 5.092ms - 200
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent llm correlationId=13b72f9451c380ff88d088112a9c84e3 conversationId=4 turnId=1 attemptId=2 data={"elapsedMs":7.1084,"Tokens":9505,"CachedTokens":0,"callNumber":1,"repair":false,"MaxOutputTokens":16000,"ReasoningEffort":"none","schemaRepaired":false,"proposalRepaired":false,"emptyRepaired":false,"coverageRepaired":false,"failureKind":null,"HttpStatus":null,"RetryAfterSeconds":null,"ProviderCode":null,"Reason":null}
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent model_output correlationId=13b72f9451c380ff88d088112a9c84e3 conversationId=4 turnId=1 attemptId=2 data={"phase":"Read","Action":"chat","Clarification":null,"Tool":null,"PendingAnswer":null,"replyLength":37}
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent chat correlationId=13b72f9451c380ff88d088112a9c84e3 conversationId=4 turnId=1 attemptId=2 data=(null)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int64), @p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.agent_conversations WHERE id = @p0 AND user_id = @p1 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @p
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@id='?' (DbType = Int64), @userId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @id AND a.user_id = @userId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @conversationId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT max(a.sequence_no)
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p8='?' (DbType = Int64), @p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?' (DbType = Int64), @p3='?' (DbType = Int64), @p4='?' (DbType = DateTime), @p5='?' (DbType = Object), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int64), @p9='?' (DbType = Int64), @p12='?' (DbType = Int64), @p10='?', @p11='?' (DbType = Object), @p13='?' (DbType = Int64), @p14='?' (DbType = Int64), @p15='?' (DbType = DateTime), @p16='?' (DbType = Object), @p17='?', @p18='?', @p19='?' (DbType = Object), @p20='?', @p21='?' (DbType = Int32), @p22='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.agent_conversations SET expires_at = @p0, last_message_sequence = @p1, processing_attempt_id = @p2, processing_turn_id = @p3, processing_until = @p4, state = @p5, updated_at = @p6, version = @p7
+      WHERE id = @p8 AND version = @p9;
+      UPDATE core.agent_messages SET processing_status = @p10, response_payload = @p11
+      WHERE id = @p12;
+      INSERT INTO core.agent_messages (client_message_id, conversation_id, created_at, payload, processing_status, request_hash, response_payload, role, sequence_no, turn_id)
+      VALUES (@p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20, @p21, @p22)
+      RETURNING id;
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent completed correlationId=13b72f9451c380ff88d088112a9c84e3 conversationId=4 turnId=1 attemptId=2 data={"proposalVersion":null}
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE core.roadmap_generation_jobs AS job
+      SET status = 'running'
+      WHERE job.id = (
+          SELECT queued.id
+          FROM core.roadmap_generation_jobs AS queued
+          WHERE queued.status = 'queued'
+          ORDER BY queued.id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING job.id AS "Value"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.outbox_messages AS m
+      SET status = 'processing', locked_until = now() + make_interval(secs => @p0)
+      WHERE m.id IN (
+          SELECT o.id
+          FROM core.outbox_messages AS o
+          WHERE ((o.status = 'pending' AND o.next_attempt_at <= now())
+              OR (o.status = 'processing' AND o.locked_until < now()))
+            AND NOT EXISTS (
+                SELECT 1
+                FROM core.outbox_messages AS earlier
+                WHERE earlier.aggregate_key = o.aggregate_key
+                  AND earlier.id < o.id
+                  AND earlier.status IN ('pending', 'processing'))
+          ORDER BY o.id
+          LIMIT @p1
+          FOR UPDATE SKIP LOCKED)
+      RETURNING m.*
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@normalizedEmail='?'], CommandType='Text', CommandTimeout='30']
+      SELECT u.id, u.avatar_media_id, u.bio, u.created_at, u.deleted_at, u.display_name, u.email, u.email_verified_at, u.last_login_at, u.password_hash, u.phone, u.role_id, u.status, u.suspended_until, u.updated_at, r.id, r.code, r.name, m.id, m.created_at, m.mime_type, m.size_bytes, m.storage_key, m.uploader_id, m.url
+      FROM core.users AS u
+      INNER JOIN core.roles AS r ON u.role_id = r.id
+      LEFT JOIN core.media_files AS m ON u.avatar_media_id = m.id
+      WHERE u.deleted_at IS NULL AND u.email = @normalizedEmail
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?', @p1='?' (DbType = Int32), @p2='?', @p3='?' (DbType = DateTime), @p4='?' (DbType = Int64), @p5='?', @p6='?' (DbType = Object), @p7='?' (DbType = Object), @p8='?' (DbType = Object), @p9='?' (DbType = Int32), @p10='?', @p11='?' (DbType = DateTime), @p12='?' (DbType = DateTime), @p13='?' (DbType = Object), @p14='?', @p15='?' (DbType = Int64), @p16='?' (DbType = DateTime), @p17='?', @p18='?' (DbType = Int32), @p21='?' (DbType = Int32), @p19='?' (DbType = DateTime), @p20='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.audit_logs (action, actor_id, actor_role, created_at, entity_id, entity_type, ip_address, new_values, old_values, subject_user_id, user_agent)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10)
+      RETURNING id;
+      INSERT INTO core.user_sessions (created_at, expires_at, ip_address, refresh_token_hash, replaced_by_session_id, revoked_at, user_agent, user_id)
+      VALUES (@p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18)
+      RETURNING id;
+      UPDATE core.users SET last_login_at = @p19, updated_at = @p20
+      WHERE id = @p21;
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:18112/users/511/survey
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:18112/users/511/survey
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[104]
+      HTTP request failed after 9.5097ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[104]
+      HTTP request failed after 9.9291ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+warn: ANGI.Infrastructure.Services.Recommendation.RecommendationService[0]
+      RECO-09 could not be reached.
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ANGI.Infrastructure.Services.Recommendation.RecommendationService.SendAsync(HttpMethod method, String path, Object body, String endpointId, CancellationToken ct, Nullable`1 timeoutMilliseconds) in E:\ANGI-Agent-Eval\src\v20\ANGI.Infrastructure\Services\Recommendation\RecommendationService.cs:line 285
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (DbType = Int32), @p5='?' (DbType = Int64), @p6='?' (DbType = Int64), @p7='?' (DbType = DateTime), @p8='?' (DbType = Int64), @p9='?' (DbType = Int64), @p10='?' (DbType = Object), @p11='?', @p12='?' (DbType = DateTime), @p13='?' (DbType = Int32), @p14='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.agent_conversations (created_at, current_proposal_id, expires_at, last_message_sequence, last_proposal_version, processing_attempt_id, processing_turn_id, processing_until, purged_client_message_id, roadmap_id, state, status, updated_at, user_id, version)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p0='?' (DbType = Int64), @p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.agent_conversations WHERE id = @p0 AND user_id = @p1 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@id='?' (DbType = Int64), @userId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @id AND a.user_id = @userId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64), @clientMessageId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.client_message_id, a.conversation_id, a.created_at, a.payload, a.processing_status, a.request_hash, a.response_payload, a.role, a.sequence_no, a.turn_id
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId AND a.client_message_id = @clientMessageId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.users WHERE id = @p0 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      SELECT s."Value"
+      FROM (
+          SELECT count(*)::integer AS "Value"
+          FROM core.agent_messages m JOIN core.agent_conversations c ON c.id = m.conversation_id
+          CROSS JOIN LATERAL jsonb_array_elements_text(m.payload->'attempts') a(value)
+          WHERE c.user_id = @p0 AND m.role = 'user' AND a.value::timestamptz >= @p1
+      ) AS s
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      SELECT s."Value"
+      FROM (
+          SELECT count(*)::integer AS "Value"
+          FROM core.agent_messages m JOIN core.agent_conversations c ON c.id = m.conversation_id
+          CROSS JOIN LATERAL jsonb_array_elements_text(m.payload->'attempts') a(value)
+          WHERE c.user_id = @p0 AND m.role = 'user' AND a.value::timestamptz >= @p1
+      ) AS s
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @conversationId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT max(a.sequence_no)
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p7='?' (DbType = Int64), @p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?' (DbType = Int64), @p3='?' (DbType = Int64), @p4='?' (DbType = DateTime), @p5='?' (DbType = DateTime), @p6='?' (DbType = Int64), @p8='?' (DbType = Int64), @p9='?' (DbType = Int64), @p10='?' (DbType = Int64), @p11='?' (DbType = DateTime), @p12='?' (DbType = Object), @p13='?', @p14='?', @p15='?' (DbType = Object), @p16='?', @p17='?' (DbType = Int32), @p18='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.agent_conversations SET expires_at = @p0, last_message_sequence = @p1, processing_attempt_id = @p2, processing_turn_id = @p3, processing_until = @p4, updated_at = @p5, version = @p6
+      WHERE id = @p7 AND version = @p8;
+      INSERT INTO core.agent_messages (client_message_id, conversation_id, created_at, payload, processing_status, request_hash, response_payload, role, sequence_no, turn_id)
+      VALUES (@p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18)
+      RETURNING id;
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent claimed correlationId=40f312e63809ee33c78b4addffe748f5 conversationId=5 turnId=1 attemptId=2 data=(null)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64), @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.client_message_id, a.conversation_id, a.created_at, a.payload, a.processing_status, a.request_hash, a.response_payload, a.role, a.sequence_no, a.turn_id
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId AND a.role <> 'tool' AND EXISTS (
+          SELECT 1
+          FROM core.agent_messages AS a0
+          WHERE a0.conversation_id = @conversationId AND a0.turn_id = a.turn_id AND a0.role = 'user' AND a0.processing_status = 'completed')
+      ORDER BY a.sequence_no DESC
+      LIMIT @p
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:18112/users/511/preferences
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:18112/users/511/preferences
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[104]
+      HTTP request failed after 8.2649ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[104]
+      HTTP request failed after 8.6668ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+warn: ANGI.Infrastructure.Services.Recommendation.RecommendationService[0]
+      RECO-PREFERENCES could not be reached.
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ANGI.Infrastructure.Services.Recommendation.RecommendationService.SendAsync(HttpMethod method, String path, Object body, String endpointId, CancellationToken ct, Nullable`1 timeoutMilliseconds) in E:\ANGI-Agent-Eval\src\v20\ANGI.Infrastructure\Services\Recommendation\RecommendationService.cs:line 285
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT t.id, t.code, t.name, t.tag_type
+      FROM core.tags AS t
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT DISTINCT r.province_name
+      FROM core.restaurants AS r
+      WHERE r.deleted_at IS NULL AND r.verification_status = 'verified' AND r.moderation_status = 'visible' AND r.province_name IS NOT NULL
+info: System.Net.Http.HttpClient.IAgentLlmService.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:18100/run/v20/v1/chat/completions
+info: System.Net.Http.HttpClient.IAgentLlmService.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:18100/run/v20/v1/chat/completions
+info: System.Net.Http.HttpClient.IAgentLlmService.ClientHandler[101]
+      Received HTTP response headers after 4.9175ms - 200
+info: System.Net.Http.HttpClient.IAgentLlmService.LogicalHandler[101]
+      End processing HTTP request after 5.0622ms - 200
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent llm correlationId=40f312e63809ee33c78b4addffe748f5 conversationId=5 turnId=1 attemptId=2 data={"elapsedMs":6.5445,"Tokens":9517,"CachedTokens":0,"callNumber":1,"repair":false,"MaxOutputTokens":16000,"ReasoningEffort":"none","schemaRepaired":false,"proposalRepaired":false,"emptyRepaired":false,"coverageRepaired":false,"failureKind":null,"HttpStatus":null,"RetryAfterSeconds":null,"ProviderCode":null,"Reason":null}
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent model_output correlationId=40f312e63809ee33c78b4addffe748f5 conversationId=5 turnId=1 attemptId=2 data={"phase":"Read","Action":"chat","Clarification":null,"Tool":null,"PendingAnswer":null,"replyLength":37}
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent chat correlationId=40f312e63809ee33c78b4addffe748f5 conversationId=5 turnId=1 attemptId=2 data=(null)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int64), @p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.agent_conversations WHERE id = @p0 AND user_id = @p1 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @p
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@id='?' (DbType = Int64), @userId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @id AND a.user_id = @userId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @conversationId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT max(a.sequence_no)
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p8='?' (DbType = Int64), @p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?' (DbType = Int64), @p3='?' (DbType = Int64), @p4='?' (DbType = DateTime), @p5='?' (DbType = Object), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int64), @p9='?' (DbType = Int64), @p12='?' (DbType = Int64), @p10='?', @p11='?' (DbType = Object), @p13='?' (DbType = Int64), @p14='?' (DbType = Int64), @p15='?' (DbType = DateTime), @p16='?' (DbType = Object), @p17='?', @p18='?', @p19='?' (DbType = Object), @p20='?', @p21='?' (DbType = Int32), @p22='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.agent_conversations SET expires_at = @p0, last_message_sequence = @p1, processing_attempt_id = @p2, processing_turn_id = @p3, processing_until = @p4, state = @p5, updated_at = @p6, version = @p7
+      WHERE id = @p8 AND version = @p9;
+      UPDATE core.agent_messages SET processing_status = @p10, response_payload = @p11
+      WHERE id = @p12;
+      INSERT INTO core.agent_messages (client_message_id, conversation_id, created_at, payload, processing_status, request_hash, response_payload, role, sequence_no, turn_id)
+      VALUES (@p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20, @p21, @p22)
+      RETURNING id;
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent completed correlationId=40f312e63809ee33c78b4addffe748f5 conversationId=5 turnId=1 attemptId=2 data={"proposalVersion":null}
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int64), @p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.agent_conversations WHERE id = @p0 AND user_id = @p1 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@id='?' (DbType = Int64), @userId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @id AND a.user_id = @userId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64), @clientMessageId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.client_message_id, a.conversation_id, a.created_at, a.payload, a.processing_status, a.request_hash, a.response_payload, a.role, a.sequence_no, a.turn_id
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId AND a.client_message_id = @clientMessageId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.users WHERE id = @p0 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      SELECT s."Value"
+      FROM (
+          SELECT count(*)::integer AS "Value"
+          FROM core.agent_messages m JOIN core.agent_conversations c ON c.id = m.conversation_id
+          CROSS JOIN LATERAL jsonb_array_elements_text(m.payload->'attempts') a(value)
+          WHERE c.user_id = @p0 AND m.role = 'user' AND a.value::timestamptz >= @p1
+      ) AS s
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[p0='?' (DbType = Int32), p1='?' (DbType = DateTime)], CommandType='Text', CommandTimeout='30']
+      SELECT s."Value"
+      FROM (
+          SELECT count(*)::integer AS "Value"
+          FROM core.agent_messages m JOIN core.agent_conversations c ON c.id = m.conversation_id
+          CROSS JOIN LATERAL jsonb_array_elements_text(m.payload->'attempts') a(value)
+          WHERE c.user_id = @p0 AND m.role = 'user' AND a.value::timestamptz >= @p1
+      ) AS s
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @conversationId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT max(a.sequence_no)
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (7ms) [Parameters=[@p7='?' (DbType = Int64), @p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?' (DbType = Int64), @p3='?' (DbType = Int64), @p4='?' (DbType = DateTime), @p5='?' (DbType = DateTime), @p6='?' (DbType = Int64), @p8='?' (DbType = Int64), @p9='?' (DbType = Int64), @p10='?' (DbType = Int64), @p11='?' (DbType = DateTime), @p12='?' (DbType = Object), @p13='?', @p14='?', @p15='?' (DbType = Object), @p16='?', @p17='?' (DbType = Int32), @p18='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.agent_conversations SET expires_at = @p0, last_message_sequence = @p1, processing_attempt_id = @p2, processing_turn_id = @p3, processing_until = @p4, updated_at = @p5, version = @p6
+      WHERE id = @p7 AND version = @p8;
+      INSERT INTO core.agent_messages (client_message_id, conversation_id, created_at, payload, processing_status, request_hash, response_payload, role, sequence_no, turn_id)
+      VALUES (@p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18)
+      RETURNING id;
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent claimed correlationId=84c8ba2caee91d8f2ca7d26b6bcfaa9c conversationId=5 turnId=3 attemptId=4 data=(null)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64), @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.client_message_id, a.conversation_id, a.created_at, a.payload, a.processing_status, a.request_hash, a.response_payload, a.role, a.sequence_no, a.turn_id
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId AND a.role <> 'tool' AND EXISTS (
+          SELECT 1
+          FROM core.agent_messages AS a0
+          WHERE a0.conversation_id = @conversationId AND a0.turn_id = a.turn_id AND a0.role = 'user' AND a0.processing_status = 'completed')
+      ORDER BY a.sequence_no DESC
+      LIMIT @p
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:18112/users/511/preferences
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:18112/users/511/preferences
+info: System.Net.Http.HttpClient.IRecommendationService.ClientHandler[104]
+      HTTP request failed after 9.7113ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.IRecommendationService.LogicalHandler[104]
+      HTTP request failed after 10.2974ms
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+warn: ANGI.Infrastructure.Services.Recommendation.RecommendationService[0]
+      RECO-PREFERENCES could not be reached.
+      System.Net.Http.HttpRequestException: An error occurred while sending the request.
+       ---> System.Net.Http.HttpIOException: The response ended prematurely. (ResponseEnded)
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnection.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ANGI.Infrastructure.Services.Recommendation.RecommendationService.SendAsync(HttpMethod method, String path, Object body, String endpointId, CancellationToken ct, Nullable`1 timeoutMilliseconds) in E:\ANGI-Agent-Eval\src\v20\ANGI.Infrastructure\Services\Recommendation\RecommendationService.cs:line 285
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT t.id, t.code, t.name, t.tag_type
+      FROM core.tags AS t
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT DISTINCT r.province_name
+      FROM core.restaurants AS r
+      WHERE r.deleted_at IS NULL AND r.verification_status = 'verified' AND r.moderation_status = 'visible' AND r.province_name IS NOT NULL
+info: System.Net.Http.HttpClient.IAgentLlmService.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:18100/run/v20/v1/chat/completions
+info: System.Net.Http.HttpClient.IAgentLlmService.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:18100/run/v20/v1/chat/completions
+info: System.Net.Http.HttpClient.IAgentLlmService.ClientHandler[101]
+      Received HTTP response headers after 5.241ms - 200
+info: System.Net.Http.HttpClient.IAgentLlmService.LogicalHandler[101]
+      End processing HTTP request after 5.4886ms - 200
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent llm correlationId=84c8ba2caee91d8f2ca7d26b6bcfaa9c conversationId=5 turnId=3 attemptId=4 data={"elapsedMs":7.2803,"Tokens":9567,"CachedTokens":0,"callNumber":1,"repair":false,"MaxOutputTokens":16000,"ReasoningEffort":"none","schemaRepaired":false,"proposalRepaired":false,"emptyRepaired":false,"coverageRepaired":false,"failureKind":null,"HttpStatus":null,"RetryAfterSeconds":null,"ProviderCode":null,"Reason":null}
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent model_output correlationId=84c8ba2caee91d8f2ca7d26b6bcfaa9c conversationId=5 turnId=3 attemptId=4 data={"phase":"Read","Action":"chat","Clarification":null,"Tool":null,"PendingAnswer":null,"replyLength":37}
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent chat correlationId=84c8ba2caee91d8f2ca7d26b6bcfaa9c conversationId=5 turnId=3 attemptId=4 data=(null)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int64), @p1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT 1 FROM core.agent_conversations WHERE id = @p0 AND user_id = @p1 FOR UPDATE
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @p
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@id='?' (DbType = Int64), @userId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @id AND a.user_id = @userId
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.current_proposal_id, a.expires_at, a.last_message_sequence, a.last_proposal_version, a.processing_attempt_id, a.processing_turn_id, a.processing_until, a.purged_client_message_id, a.roadmap_id, a.state, a.status, a.updated_at, a.user_id, a.version
+      FROM core.agent_conversations AS a
+      WHERE a.id = @conversationId
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@conversationId='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT max(a.sequence_no)
+      FROM core.agent_messages AS a
+      WHERE a.conversation_id = @conversationId
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p8='?' (DbType = Int64), @p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?' (DbType = Int64), @p3='?' (DbType = Int64), @p4='?' (DbType = DateTime), @p5='?' (DbType = Object), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int64), @p9='?' (DbType = Int64), @p12='?' (DbType = Int64), @p10='?', @p11='?' (DbType = Object), @p13='?' (DbType = Int64), @p14='?' (DbType = Int64), @p15='?' (DbType = DateTime), @p16='?' (DbType = Object), @p17='?', @p18='?', @p19='?' (DbType = Object), @p20='?', @p21='?' (DbType = Int32), @p22='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.agent_conversations SET expires_at = @p0, last_message_sequence = @p1, processing_attempt_id = @p2, processing_turn_id = @p3, processing_until = @p4, state = @p5, updated_at = @p6, version = @p7
+      WHERE id = @p8 AND version = @p9;
+      UPDATE core.agent_messages SET processing_status = @p10, response_payload = @p11
+      WHERE id = @p12;
+      INSERT INTO core.agent_messages (client_message_id, conversation_id, created_at, payload, processing_status, request_hash, response_payload, role, sequence_no, turn_id)
+      VALUES (@p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20, @p21, @p22)
+      RETURNING id;
+info: ANGI.Infrastructure.Services.Agent.AgentTelemetry[0]
+      Agent completed correlationId=84c8ba2caee91d8f2ca7d26b6bcfaa9c conversationId=5 turnId=3 attemptId=4 data={"proposalVersion":null}

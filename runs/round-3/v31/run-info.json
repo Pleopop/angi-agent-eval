@@ -1,0 +1,24 @@
+﻿{
+    "runId":  "round-3/v31",
+    "startedAt":  "2026-11-23T11:36:30.1154283+07:00",
+    "model":  "gpt-6-luna",
+    "mode":  "live",
+    "versions":  {
+                     "v31":  "c75f9b6"
+                 },
+    "seedDump":  "angi-prod-sync-20261123.dump",
+    "dataAdjustments":  "none",
+    "seedDumpSha256":  "5e3238a8893fc5d19dac7b6a7a53dd7e5d8a723a85613c10b3480ecde07c6369",
+    "scenarios":  [
+                      "edit-add-dish",
+                      "edit-add-meal",
+                      "edit-swap",
+                      "plan-full",
+                      "plan-taste",
+                      "plan-intake",
+                      "plan-tight",
+                      "save-confirm"
+                  ],
+    "repeats":  2,
+    "tokenCap":  2400000
+}

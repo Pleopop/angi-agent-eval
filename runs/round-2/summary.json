@@ -1,0 +1,30 @@
+[
+  {
+    "version": "v30",
+    "scenarios": 20,
+    "passed": 15,
+    "turns": 54,
+    "failedTurns": 0,
+    "calls": 91,
+    "input": 1213390,
+    "cached": 1048407,
+    "output": 28131,
+    "total": 1241521,
+    "medianMs": 3114,
+    "p90Ms": 16749
+  },
+  {
+    "version": "v31",
+    "scenarios": 20,
+    "passed": 19,
+    "turns": 48,
+    "failedTurns": 0,
+    "calls": 93,
+    "input": 1304361,
+    "cached": 1022935,
+    "output": 31735,
+    "total": 1336096,
+    "medianMs": 6336,
+    "p90Ms": 18747
+  }
+]

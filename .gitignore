@@ -1,0 +1,15 @@
+# Secrets: database passwords, JWT and reco keys, test account password. Template: .secrets.env.example
+.secrets.env
+
+# Production snapshot holds real user data; the test account SQL holds its password hash. Never commit either.
+seed/*
+!seed/README.md
+
+# Exported backend source and builds: rebuilt from the angi-backend commits by tools/build-version.sh
+src/
+build/
+artifacts-test/
+empty-appdata/
+
+# Office lock files
+~$*

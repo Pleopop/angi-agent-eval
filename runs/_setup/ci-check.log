@@ -1,0 +1,476 @@
+﻿
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:48.75
+BUILD_EXIT=0
+Test run for E:\CapStone\angi-backend\ANGI.IntegrationTests\bin\Debug\net10.0\ANGI.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+Test run for E:\CapStone\angi-backend\ANGI.UnitTests\bin\Debug\net10.0\ANGI.UnitTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+dotnet : [xUnit.net 00:00:08.59]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.MenuSubmissionsControllerTests.Reject_ShouldPreserveMenu [FAIL]
+At line:1 char:249
++ ... check.log'; dotnet test ANGI.slnx -nologo -v q --no-build 2>&1 | Out- ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([xUnit.net 00:0...erveMenu [FAIL]:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[xUnit.net 00:00:08.73]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.MenuSubmissionsControllerTests.List_ShouldFilterAndPaginate [FAIL]
+[xUnit.net 00:00:08.75]     ANGI.IntegrationTests.WebApi.Controllers.Moderation.MenuSubmissionsControllerTests.Decision
+s_ValidNoteBoundaries_ShouldSucceed [FAIL]
+[xUnit.net 00:00:08.78]     ANGI.IntegrationTests.WebApi.Controllers.Moderation.MenuSubmissionsControllerTests.Approve_
+SaveFailure_ShouldRollBackEverything [FAIL]
+[xUnit.net 00:00:08.80]     ANGI.IntegrationTests.WebApi.Controllers.Moderation.MenuSubmissionsControllerTests.List_Equ
+alTimestamps_ShouldPaginateStably [FAIL]
+[xUnit.net 00:00:08.83]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.MenuSubmissionsControllerTests.Errors_ShouldMatchHttpContract 
+[FAIL]
+[xUnit.net 00:00:08.86]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.MenuSubmissionsControllerTests.Detail_ShouldReturnDocumentedDiff 
+[FAIL]
+[xUnit.net 00:00:08.88]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.MenuSubmissionsControllerTests.Decisions_NonPending_ShouldConflict 
+[FAIL]
+[xUnit.net 00:00:08.91]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.MenuSubmissionsControllerTests.Permissions_ShouldUseDatabaseState 
+[FAIL]
+[xUnit.net 00:00:08.93]     ANGI.IntegrationTests.WebApi.Controllers.Moderation.MenuSubmissionsControllerTests.Concurre
+ntDecisions_ShouldAllowOneWinner [FAIL]
+[xUnit.net 00:00:09.04]     ANGI.IntegrationTests.WebApi.Controllers.Moderation.MenuSubmissionsControllerTests.Approve_
+ShouldPersistAtomicMenuReplacement [FAIL]
+[xUnit.net 00:00:09.54]     
+ANGI.IntegrationTests.EndToEnd.AdministrationModsEndToEndTests.DeactivateMod_ShouldRevokeSessionsAndPersistAudit [FAIL]
+[xUnit.net 00:00:09.59]     ANGI.IntegrationTests.EndToEnd.AdministrationModsEndToEndTests.CreateListAndGetMod_ShouldPe
+rsistAndReturnCompleteContracts [FAIL]
+
+Passed!  - Failed:     0, Passed:  3535, Skipped:     0, Total:  3535, Duration: 13 s - ANGI.UnitTests.dll (net10.0)
+[xUnit.net 00:00:23.91]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Restaurant.RestaurantMenuRep
+ositoryPostgresConcurrencyTests.Submit_WithTwoDatabaseScopes_ShouldAllowExactlyOneTransition [FAIL]
+[xUnit.net 00:00:23.93]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Restaurant.RestaurantMenuRep
+ositoryPostgresConcurrencyTests.Submit_WithSoftDeletedRestaurant_ShouldReturnNotFound [FAIL]
+[xUnit.net 00:00:24.05]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Restaurant.RestaurantMenuRep
+ositoryPostgresConcurrencyTests.Submit_ConcurrentWithUpdateItem_ShouldNeverUpdateAfterPending [FAIL]
+[xUnit.net 00:00:24.08]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Restaurant.RestaurantMenuRep
+ositoryPostgresConcurrencyTests.Submit_ConcurrentWithCancel_ShouldFinishCancelled [FAIL]
+[xUnit.net 00:00:24.10]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Restaurant.RestaurantMenuRep
+ositoryPostgresConcurrencyTests.Submit_ConcurrentWithAddItem_ShouldNeverAddAfterPending [FAIL]
+[xUnit.net 00:00:24.11]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Restaurant.RestaurantMenuRep
+ositoryPostgresConcurrencyTests.Submit_ConcurrentWithDeleteItem_ShouldNeverDeleteAfterPending [FAIL]
+[xUnit.net 00:00:25.60]     ANGI.IntegrationTests.Infrastructure.Persistences.Migrations.ReplaceRoadmapVersionWithUpdat
+edAtTests.Upgrade_PreservesHistoryAndCommittedReplay_AndInvalidatesLegacyPreviews [FAIL]
+[xUnit.net 00:00:30.89]     ANGI.IntegrationTests.EndToEnd.ConcurrentInteractionEndToEndTests.CommentAndDelete_Concurre
+ntly_ShouldKeepCommentCountExact [FAIL]
+[xUnit.net 00:00:30.91]     
+ANGI.IntegrationTests.EndToEnd.ConcurrentInteractionEndToEndTests.LikeAndUnlike_Concurrently_ShouldKeepLikeCountExact 
+[FAIL]
+[xUnit.net 00:00:30.94]     
+ANGI.IntegrationTests.EndToEnd.ConcurrentInteractionEndToEndTests.ReplyReview_Concurrently_ShouldKeepOneReply [FAIL]
+[xUnit.net 00:00:31.03]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Discovery.DishRepositoryMeal
+HoursTests.GetCandidateIds_OpenAtTime_NeedsThirtyMinutesLeft [FAIL]
+[xUnit.net 00:00:31.04]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Discovery.DishRepositoryMeal
+HoursTests.GetCandidateIds_NoBusinessHours_KeepsDish [FAIL]
+[xUnit.net 00:00:31.06]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Discovery.DishRepositoryMeal
+HoursTests.GetCandidateIds_OvernightHours_ReachesLateNight [FAIL]
+[xUnit.net 00:00:31.08]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Discovery.DishRepositoryMeal
+HoursTests.GetCandidateIds_MorningOnlyClosedSunday_FiltersByMealAndWeekday [FAIL]
+[xUnit.net 00:00:31.14]     ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.SubmitVerification_ShouldPersis
+tPendingVerificationAndOwnedDocument [FAIL]
+[xUnit.net 00:00:31.16]     
+ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.UploadMedia_ShouldReturnCreatedAndPersistMetadata [FAIL]
+[xUnit.net 00:00:31.18]     ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.RegisterRestaurant_WithConcurre
+ntValidPhones_ShouldCreateOnlyOneRestaurant [FAIL]
+[xUnit.net 00:00:31.20]     ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.RegisterAndUpdateRestaurant_Wit
+hLegacyDistrict_ShouldIgnoreIt [FAIL]
+[xUnit.net 00:00:31.22]     ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.RegisterRestaurant_WithOwnedMed
+ia_ShouldRequireImagesAndPersistValidAggregate [FAIL]
+[xUnit.net 00:00:31.23]     ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.RegisterRestaurant_WithInvalidP
+hones_ShouldReturnValidationWithoutCreatingRows [FAIL]
+[xUnit.net 00:00:31.24]     ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.RegisterRestaurant_WithNullBusi
+nessHour_ShouldRejectBeforePersistence [FAIL]
+[xUnit.net 00:00:31.25]     ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.ManageAndSubmitMenu_ShouldPersi
+stDraftItemsAndPendingTransition [FAIL]
+[xUnit.net 00:00:31.26]     ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.RegisterGetAndUpdateRestaurant_
+ShouldPersistCompleteProfileLifecycle [FAIL]
+[xUnit.net 00:00:31.27]     ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.RegisterRestaurant_WithValidPho
+nes_ShouldPersistAndReturnFormattedNumbers [FAIL]
+[xUnit.net 00:00:31.29]     ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.UpdateRestaurant_WithInvalidPho
+nes_ShouldLeaveProfileAndAuditUnchanged [FAIL]
+[xUnit.net 00:00:31.30]     ANGI.IntegrationTests.EndToEnd.OwnerRestaurantEndToEndTests.UpdateRestaurant_WithGalleryIds
+FromProfile_ShouldDropReorderAndAddPhotos [FAIL]
+[xUnit.net 00:00:31.38]     ANGI.IntegrationTests.EndToEnd.RoadmapGenerationEndToEndTests.GenerateRoadmap_ShouldFillEmp
+tyMealsThenReplaceSlotThroughWorker [FAIL]
+[xUnit.net 00:00:31.41]     ANGI.IntegrationTests.EndToEnd.RoadmapGenerationEndToEndTests.GenerateRoadmap_WithInvalidTa
+rgets_ShouldReturnDocumentedErrorsAndFailedJob [FAIL]
+[xUnit.net 00:00:32.72]     
+ANGI.IntegrationTests.EndToEnd.UserSanctionEndToEndTests.SuspendThenUnban_ShouldRestoreTheAccountAndLiftTheSanction 
+[FAIL]
+[xUnit.net 00:00:32.73]     
+ANGI.IntegrationTests.EndToEnd.UserSanctionEndToEndTests.SanctionOrUnban_OnDeletedAccount_ShouldReturnUserNotFound 
+[FAIL]
+[xUnit.net 00:00:32.80]     ANGI.IntegrationTests.EndToEnd.AdministrationPermissionsEndToEndTests.ReadPermissions_Shoul
+dReturnCatalogDefaultsOverridesAndEffectiveSet [FAIL]
+[xUnit.net 00:00:32.82]     ANGI.IntegrationTests.EndToEnd.AdministrationPermissionsEndToEndTests.ReplaceModRolePermiss
+ions_ShouldPersistExactDefaultsAndAudit [FAIL]
+[xUnit.net 00:00:32.84]     ANGI.IntegrationTests.EndToEnd.AdministrationPermissionsEndToEndTests.ReplaceModPermissions
+_ShouldPersistCompleteReplacementAndAudit [FAIL]
+[xUnit.net 00:00:32.91]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModReportsHttpTests.RejectsInvalidQueriesAndMissingReports [FAIL]
+[xUnit.net 00:00:33.51]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModReportsHttpTests.ClaimsThenResolvesReport [FAIL]
+[xUnit.net 00:00:33.52]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModReportsHttpTests.SerializesConcurrentClaims [FAIL]
+[xUnit.net 00:00:33.54]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModReportsHttpTests.EnforcesTargetSpecificPermissions [FAIL]
+[xUnit.net 00:00:33.55]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModReportsHttpTests.SerializesClaimWithResolution [FAIL]
+[xUnit.net 00:00:33.56]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModReportsHttpTests.RollsBackFailedClaim [FAIL]
+[xUnit.net 00:00:33.58]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModReportsHttpTests.ListsAndFiltersReportQueue [FAIL]
+[xUnit.net 00:00:33.59]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModReportsHttpTests.BlocksInactiveModeratorAccounts [FAIL]
+[xUnit.net 00:00:33.60]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModReportsHttpTests.ReturnsAuthorizedReportDetail [FAIL]
+[xUnit.net 00:00:33.73]     ANGI.IntegrationTests.Infrastructure.Persistences.Configs.AgentProposalConfigurationTests.U
+ncommittedCreate_RejectsSourceAndResultMetadata [FAIL]
+[xUnit.net 00:00:33.75]     ANGI.IntegrationTests.Infrastructure.Persistences.Configs.AgentProposalConfigurationTests.C
+ommittedProposal_RequiresCompleteFiniteResult [FAIL]
+[xUnit.net 00:00:33.76]     ANGI.IntegrationTests.Infrastructure.Persistences.Configs.AgentProposalConfigurationTests.U
+pdateProposal_RequiresCompleteFiniteSource [FAIL]
+[xUnit.net 00:00:33.83]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.ReturnsCompleteBoundedDetail [FAIL]
+[xUnit.net 00:00:34.48]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.ListsAndFiltersModeratorRestaurants [FAIL]
+[xUnit.net 00:00:34.49]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.ResolvesBlogReportsWithContentActions 
+[FAIL]
+[xUnit.net 00:00:34.50]     ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.ChangesDishStat
+eAndCreatesCorrectOutboxEvents [FAIL]
+[xUnit.net 00:00:34.52]     ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.ResolvesRelated
+ReportsAndAppliesRestaurantAction [FAIL]
+[xUnit.net 00:00:34.53]     ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.DismissesOnlySe
+lectedReportAndRejectsWrongTargetActions [FAIL]
+[xUnit.net 00:00:34.54]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.EnforcesRolesAndEffectivePermissions [FAIL]
+[xUnit.net 00:00:34.56]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.RejectsInvalidBodiesAndSuspensionDeadlines 
+[FAIL]
+[xUnit.net 00:00:34.57]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.SerializesConcurrentResolutions [FAIL]
+[xUnit.net 00:00:34.59]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.AppliesAllAccountSanctions [FAIL]
+[xUnit.net 00:00:34.60]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.RollsBackAllEffectsWhenPersistenceFails 
+[FAIL]
+[xUnit.net 00:00:34.61]     
+ANGI.IntegrationTests.WebApi.Controllers.Moderation.ModRestaurantsHttpTests.ChangesRestaurantStateAtomically [FAIL]
+[xUnit.net 00:00:34.69]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Restaurant.RestaurantReposit
+oryProvinceTests.Browse_ShortStoredName_MatchesFullCatalogName [FAIL]
+[xUnit.net 00:00:34.76]     ANGI.IntegrationTests.EndToEnd.RollDishEndToEndTests.Roll_NearAPoint_ShouldUseTheRadius 
+[FAIL]
+[xUnit.net 00:00:34.77]     
+ANGI.IntegrationTests.EndToEnd.RollDishEndToEndTests.Roll_WithoutCandidate_ShouldReturnNoCandidate [FAIL]
+[xUnit.net 00:00:34.79]     
+ANGI.IntegrationTests.EndToEnd.RollDishEndToEndTests.Roll_WithFilters_ShouldRollAMatchingDishAndStoreIt [FAIL]
+[xUnit.net 00:00:34.81]     
+ANGI.IntegrationTests.EndToEnd.RollDishEndToEndTests.Roll_ShouldFollowTheAccessAndValidationContract [FAIL]
+[xUnit.net 00:00:34.89]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Moderation.RestaurantModerat
+ionRepositoryTests.ExpiresOnlyDueAccountsInBoundedBatches [FAIL]
+[xUnit.net 00:00:34.91]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Moderation.RestaurantModerat
+ionRepositoryTests.DoesNotOverwriteConcurrentBan [FAIL]
+[xUnit.net 00:00:34.98]     
+ANGI.IntegrationTests.EndToEnd.DishDetailEndToEndTests.BrowseLists_ShouldIncludeTheRestaurantWard [FAIL]
+[xUnit.net 00:00:35.00]     
+ANGI.IntegrationTests.EndToEnd.DishDetailEndToEndTests.GetDishDetail_ForNonPublicDish_ShouldReturnDishNotFound [FAIL]
+[xUnit.net 00:00:35.01]     
+ANGI.IntegrationTests.EndToEnd.DishDetailEndToEndTests.GetDishDetail_ForPublicDish_ShouldReturnDishDetailAnonymously 
+[FAIL]
+[xUnit.net 00:00:35.08]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Discovery.DishRepositoryProv
+inceTests.GetCandidateIds_ShortStoredName_MatchesFullCatalogName [FAIL]
+[xUnit.net 00:00:35.10]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Discovery.DishRepositoryProv
+inceTests.GetTrendingIds_ShortStoredName_MatchesFullCatalogName [FAIL]
+[xUnit.net 00:00:35.11]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Discovery.DishRepositoryProv
+inceTests.GetCandidateIds_FullStoredName_MatchesBothSpellings [FAIL]
+[xUnit.net 00:00:35.13]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Auth.AuthenticationRepositor
+yPostgresConcurrencyTests.VerifyEmail_WithTwoDatabaseScopes_ShouldAllowExactlyOneConsumer [FAIL]
+[xUnit.net 00:00:35.14]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Auth.AuthenticationRepositor
+yPostgresConcurrencyTests.ResendVerificationEmail_WithTwoDatabaseScopes_ShouldLeaveOneUnusedToken [FAIL]
+[xUnit.net 00:00:35.28]     
+ANGI.IntegrationTests.EndToEnd.AuthEndToEndTests.RegisterAndVerifyEmail_ShouldPersistAndActivateAccount [FAIL]
+[xUnit.net 00:00:35.30]     
+ANGI.IntegrationTests.EndToEnd.AuthEndToEndTests.RegisterDuplicateEmail_ShouldReturnConflictEnvelopeWithoutSecondUser 
+[FAIL]
+[xUnit.net 00:00:35.31]     
+ANGI.IntegrationTests.EndToEnd.AuthEndToEndTests.LoginRefreshAndLogout_ShouldPersistSessionLifecycle [FAIL]
+[xUnit.net 00:00:35.32]     
+ANGI.IntegrationTests.EndToEnd.AuthEndToEndTests.GoogleLogin_ShouldPersistNewLinkedAccountAndSession [FAIL]
+[xUnit.net 00:00:35.34]     
+ANGI.IntegrationTests.EndToEnd.AuthEndToEndTests.GoogleLogin_OnUnverifiedPasswordAccount_ShouldRemoveThatPassword 
+[FAIL]
+[xUnit.net 00:00:35.35]     ANGI.IntegrationTests.EndToEnd.AuthEndToEndTests.ForgotAndResetPassword_ShouldConsumeTokenC
+hangePasswordAndRevokeSessions [FAIL]
+[xUnit.net 00:00:35.42]     
+ANGI.IntegrationTests.EndToEnd.ReportEndToEndTests.ReviewAndReport_ShouldNeedAVisibleRestaurantAndRecomputeRating 
+[FAIL]
+[xUnit.net 00:00:35.44]     
+ANGI.IntegrationTests.EndToEnd.ReportEndToEndTests.ReportRestaurant_WithForeignEvidence_ShouldRejectAndKeepOwnEvidence 
+[FAIL]
+[xUnit.net 00:00:35.52]     
+ANGI.IntegrationTests.EndToEnd.HomeEndToEndTests.Home_WithoutProvinceAndWithBadLimit_ShouldFollowTheContract [FAIL]
+[xUnit.net 00:00:35.55]     ANGI.IntegrationTests.EndToEnd.HomeEndToEndTests.Home_ShouldBuildEveryBlockFromTheDatabase 
+[FAIL]
+[xUnit.net 00:00:35.63]     
+ANGI.IntegrationTests.EndToEnd.BrowseDishesEndToEndTests.Browse_WithCursor_ShouldWalkEveryPageOnce [FAIL]
+[xUnit.net 00:00:35.64]     
+ANGI.IntegrationTests.EndToEnd.BrowseDishesEndToEndTests.TagsAndImpressions_ShouldFollowTheirContracts [FAIL]
+[xUnit.net 00:00:35.65]     
+ANGI.IntegrationTests.EndToEnd.BrowseDishesEndToEndTests.Browse_NearAPoint_ShouldUseTheRadius [FAIL]
+[xUnit.net 00:00:35.67]     
+ANGI.IntegrationTests.EndToEnd.BrowseDishesEndToEndTests.Browse_Cards_ShouldCarryTheDescriptions [FAIL]
+[xUnit.net 00:00:35.68]     
+ANGI.IntegrationTests.EndToEnd.BrowseDishesEndToEndTests.Browse_ShouldReturnOnlyCandidatesInRatingThenLikeOrder [FAIL]
+[xUnit.net 00:00:35.69]     
+ANGI.IntegrationTests.EndToEnd.BrowseDishesEndToEndTests.Browse_WithFilters_ShouldApplyTheDocumentedSemantics [FAIL]
+[xUnit.net 00:00:55.61]     
+ANGI.IntegrationTests.EndToEnd.CreateBlogEndToEndTests.Create_WithOwnedRoadmapAndMedia_ShouldPersistImmutableSnapshot 
+[FAIL]
+[xUnit.net 00:00:55.63]     ANGI.IntegrationTests.EndToEnd.CreateBlogEndToEndTests.Create_WithoutOptionalReferencesAndW
+ithSlugCollision_ShouldReturnPlainSuffixedBlog [FAIL]
+[xUnit.net 00:00:55.64]     ANGI.IntegrationTests.EndToEnd.CreateBlogEndToEndTests.Create_WithForeignResourcesOrTooMany
+Images_ShouldReturnDocumentedErrors [FAIL]
+[xUnit.net 00:00:55.87]     ANGI.IntegrationTests.Infrastructure.Persistences.Configs.RoadmapConfigurationUpdatedAtTest
+s.ClockBehindStoredTimestamp_AdvancesByMicrosecond_AndJsonPreservesExactToken [FAIL]
+[xUnit.net 00:00:55.89]     ANGI.IntegrationTests.Infrastructure.Persistences.Configs.RoadmapConfigurationUpdatedAtTest
+s.MovingChildren_UpdatesBothParents [FAIL]
+[xUnit.net 00:00:55.90]     ANGI.IntegrationTests.Infrastructure.Persistences.Configs.RoadmapConfigurationUpdatedAtTest
+s.ParentAndChildWrites_AdvanceTimestamp_AndRollbackRestoresIt [FAIL]
+[xUnit.net 00:00:55.91]     ANGI.IntegrationTests.Infrastructure.Persistences.Configs.RoadmapConfigurationUpdatedAtTest
+s.EfChildWrites_RefreshTrackedParent_WithFinalDatabaseTimestamp [FAIL]
+[xUnit.net 00:00:55.98]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Discovery.DishRepositoryTagG
+roupsTests.GetCandidateIds_TagAnyGroups_NeedsOneTagOfEachGroup [FAIL]
+[xUnit.net 00:00:56.26]     
+ANGI.IntegrationTests.Infrastructure.Services.Outbox.OutboxStorePostgresTests.Dispatch_ShouldSettleRowsAndKeepKeyOrder 
+[FAIL]
+[xUnit.net 00:00:56.28]     
+ANGI.IntegrationTests.Infrastructure.Services.Outbox.OutboxStorePostgresTests.Claim_ShouldReclaimExpiredLocks [FAIL]
+[xUnit.net 00:00:56.29]     
+ANGI.IntegrationTests.Infrastructure.Services.Outbox.OutboxStorePostgresTests.Triggers_ShouldWriteDishEventsInOrder 
+[FAIL]
+[xUnit.net 00:00:56.30]     
+ANGI.IntegrationTests.Infrastructure.Services.Outbox.OutboxStorePostgresTests.Claim_ShouldTakeOnlyTheHeadOfEachKey 
+[FAIL]
+[xUnit.net 00:00:56.31]     ANGI.IntegrationTests.Infrastructure.Services.Outbox.OutboxStorePostgresTests.Dispatch_Shou
+ldStopRetryingAtMaxAttemptsAndHonourRetryAfter [FAIL]
+[xUnit.net 00:00:56.55]     ANGI.IntegrationTests.EndToEnd.CorrespondingRestaurantEndToEndTests.DishThenRestaurant_ForG
+uest_ShouldOpenTheSameRestaurantWithTheDishInItsMenu [FAIL]
+[xUnit.net 00:00:56.56]     ANGI.IntegrationTests.EndToEnd.CorrespondingRestaurantEndToEndTests.NonPublicRestaurant_Sho
+uldBeNotFoundOnBothEndpoints [FAIL]
+[xUnit.net 00:00:56.58]     ANGI.IntegrationTests.EndToEnd.CorrespondingRestaurantEndToEndTests.DishThenRestaurant_ForT
+raveler_ShouldSucceedWithToken [FAIL]
+[xUnit.net 00:00:56.64]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Agent.AgentCatalogRepository
+Tests.DishNames_LeaveOutHiddenRemovedAndNonPublic [FAIL]
+[xUnit.net 00:00:56.67]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Agent.AgentCatalogRepository
+Tests.Lookup_EscapesWildcardsAndSeparatesUnavailableFromMissing [FAIL]
+[xUnit.net 00:00:56.68]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Agent.AgentCatalogRepository
+Tests.Provinces_ComeFromPublicRestaurantsAndNearestWins [FAIL]
+[xUnit.net 00:00:56.69]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Agent.AgentCatalogRepository
+Tests.CandidateLimit_ComesAfterAllAgentTagsAndMealCompatibility [FAIL]
+[xUnit.net 00:00:56.70]     ANGI.IntegrationTests.Infrastructure.Persistences.Repositories.Agent.AgentCatalogRepository
+Tests.Lookup_ProvinceFullSpelling_MatchesShortName [FAIL]
+[xUnit.net 00:00:56.78]     
+ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.UpdateRoadmapItem_WithInvalidTargets_ShouldReturnDocumentedErrors 
+[FAIL]
+[xUnit.net 00:00:56.79]     
+ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.RateRoadmapItem_ShouldHideForeignItemsAndAcceptHiddenDishes [FAIL]
+[xUnit.net 00:00:56.81]     
+ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.GetRoadmapDayRoute_ShouldReturnEstimatedGpsRouteAndDayNotFound 
+[FAIL]
+[xUnit.net 00:00:56.82]     
+ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.RateRoadmapItem_ShouldStoreFeedbackCountersAndOutboxEventOnce 
+[FAIL]
+[xUnit.net 00:00:56.83]     
+ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.DeleteRoadmapItem_ShouldRemoveOnlyItemAndPreserveRelatedHistory 
+[FAIL]
+[xUnit.net 00:00:56.85]     
+ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.GetRoadmapDetail_ShouldReturnOwnedCurrentCalculatedAggregate [FAIL]
+[xUnit.net 00:00:56.86]     ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.UpdateRoadmapItem_ShouldReplaceThenRepo
+sitionWithoutLeakingOldInteractions [FAIL]
+[xUnit.net 00:00:56.87]     
+ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.GetMyRoadmaps_ShouldReturnOnlyOwnedVisibleComputedSummaries [FAIL]
+[xUnit.net 00:00:56.88]     ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.AccessAnotherTravelersRoadmap_ShouldRet
+urnNotFoundAcrossOwnedEndpoints [FAIL]
+[xUnit.net 00:00:56.90]     
+ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.DeleteRoadmap_ShouldSoftDeleteAndHideOnlyTheOwnedRoadmap [FAIL]
+[xUnit.net 00:00:56.91]     
+ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.SuggestAndAddRoadmapItem_ShouldPersistAndExcludeExistingDish [FAIL]
+[xUnit.net 00:00:56.92]     
+ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.AddRoadmapItem_WithInvalidTargets_ShouldReturnDocumentedErrors 
+[FAIL]
+[xUnit.net 00:00:56.94]     ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.GetRoadmapItemDetail_ShouldReturnComple
+teOwnedDataAndHideInvalidTargets [FAIL]
+[xUnit.net 00:00:56.95]     ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.DeleteRoadmapItem_WithInvalidScope_Shou
+ldReturnItemNotFoundWithoutMutation [FAIL]
+[xUnit.net 00:00:56.96]     
+ANGI.IntegrationTests.EndToEnd.RoadmapEndToEndTests.CreateAndUpdateRoadmap_ShouldPersistDaysAndOriginInvariant [FAIL]
+[xUnit.net 00:00:59.02]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.PromptOnly_Previ
+ewAndSave_ProducesOneRoadmap [FAIL]
+[xUnit.net 00:00:59.03]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ManualEditBefore
+Confirm_ReturnsRoadmapUpdatedAtConflict [FAIL]
+[xUnit.net 00:00:59.05]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.PromptOnly_Repea
+tedContent_GetsDistinctIdsAndSupportsExplicitReplay [FAIL]
+[xUnit.net 00:00:59.06]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.InvalidNumericMe
+ssageIds_AreRejectedBeforeProvider [FAIL]
+[xUnit.net 00:00:59.08]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Current
+Location_ResolvesProvinceFromCoordinates [FAIL]
+[xUnit.net 00:00:59.09]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.Cleanup_RemovesMemoryAndPreservesRoadmap 
+[FAIL]
+[xUnit.net 00:00:59.11]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Concurr
+entSave_ProducesOneBusinessEffect [FAIL]
+[xUnit.net 00:00:59.12]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.UpdateProposal_R
+eplacesItemWithoutTransferringFeedback [FAIL]
+[xUnit.net 00:00:59.13]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.Alternative_ExcludesPreviousDish [FAIL]
+[xUnit.net 00:00:59.15]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.NumericMessageId
+s_AreConversationScopedAndReplayable [FAIL]
+[xUnit.net 00:00:59.16]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_AcceptW
+ithoutQuestion_SavesNothingUntilSaveWish [FAIL]
+[xUnit.net 00:00:59.18]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ExpiredAttempt_CannotOverwriteNewRetry 
+[FAIL]
+[xUnit.net 00:00:59.19]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Alternative_ExcludesPreviousDish 
+[FAIL]
+[xUnit.net 00:00:59.21]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Discard
+AndReset_PreserveSavedRoadmap [FAIL]
+[xUnit.net 00:00:59.24]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ConcurrentFirstO
+pen_CreatesOnlyOneConversation [FAIL]
+[xUnit.net 00:00:59.24]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.PreviewReplayAndConfirm_ProducesOneRoadmap 
+[FAIL]
+[xUnit.net 00:00:59.26]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_ManualRoadmapEdit_DropsStaleDraft 
+[FAIL]
+[xUnit.net 00:00:59.27]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ProposalSaveFail
+ure_RollsBackAndPreservesPreviousReadyState [FAIL]
+[xUnit.net 00:00:59.31]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Unrevie
+wedOrNegatedSave_NeverWritesRoadmap [FAIL]
+[xUnit.net 00:00:59.32]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.StatedTaste_With
+NoTrip_GoesToTheModelWithoutPlanningQuestions [FAIL]
+[xUnit.net 00:00:59.34]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.InvalidOutputAnd
+ProviderFailure_NeverReachRoadmap [FAIL]
+[xUnit.net 00:00:59.35]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.OpenRoadmap_Reus
+esConversationAndSupersedesOldProposal [FAIL]
+[xUnit.net 00:00:59.36]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.RemoveLastSavedItem_PreservesRoadmapAndDays 
+[FAIL]
+[xUnit.net 00:00:59.69]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ScopedPlanning_T
+hreeDaysKeepSeparateVectorsAndCommitProvenance [FAIL]
+[xUnit.net 00:00:59.71]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ForeignResources_AreConcealed [FAIL]
+[xUnit.net 00:00:59.72]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_SaveWit
+houtDate_AsksThenStoresTheDate [FAIL]
+[xUnit.net 00:00:59.73]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ManualMetadataBe
+foreNewTurn_IsPreservedOnAgentUpdate [FAIL]
+[xUnit.net 00:00:59.74]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.UnscopedTaste_Pa
+rtialAnswersReachTheModelWithHistory [FAIL]
+[xUnit.net 00:00:59.75]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Changed
+Price_BlocksSaveWithoutRoadmap [FAIL]
+[xUnit.net 00:00:59.77]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ConcurrentMessages_EnforceLeaseAndReplay 
+[FAIL]
+[xUnit.net 00:00:59.78]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Finaliz
+eFailure_RollsBackRoadmapAndCommit [FAIL]
+[xUnit.net 00:00:59.80]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_OpenApi
+_PublishesMinimalRequestExample [FAIL]
+[xUnit.net 00:00:59.82]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_NewPlan_ModelAsksInOrderThenPlans 
+[FAIL]
+[xUnit.net 00:00:59.84]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.HttpAdmission_EnforcesAuthAndValidation 
+[FAIL]
+[xUnit.net 00:00:59.85]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ReusedMessageIde
+ntity_RejectsChangedBusinessContent [FAIL]
+[xUnit.net 00:00:59.87]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ConcurrentOpenAn
+dExpiredReopen_KeepIdentityAndResetContext [FAIL]
+[xUnit.net 00:00:59.89]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.UnscopedTaste_Co
+nversation10PromptsAskBeforePlanning [FAIL]
+[xUnit.net 00:00:59.90]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Preview
+SaveAndReplay_ProducesOneRoadmap [FAIL]
+[xUnit.net 00:00:59.91]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ScopedPlanning_R
+eevaluatedSavedDishRetainsItemAndUpdatesRecoRequest [FAIL]
+[xUnit.net 00:00:59.93]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.PromptOnly_Concu
+rrentMessage_IsBusyBeforeProvider [FAIL]
+[xUnit.net 00:00:59.94]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Decline
+Question_ThenSaveCommitsPreview [FAIL]
+[xUnit.net 00:00:59.95]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Roadmap
+Deleted_ResetDetachesConversation [FAIL]
+[xUnit.net 00:00:59.97]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.TasteClarificati
+on_AppliesFourDayRequestReadAcrossPartialAnswers [FAIL]
+[xUnit.net 00:00:59.98]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ItemDeletedAfter
+Preview_ConfirmRejectsStaleTimestamp [FAIL]
+[xUnit.net 00:00:59.99]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_OverBudgetPreview_IsSavedOnRequest 
+[FAIL]
+[xUnit.net 00:01:00.01]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.UnscopedTaste_Ke
+epsPreviousPreviewButBlocksSaving [FAIL]
+[xUnit.net 00:01:00.03]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.FullSelection_Up
+datesOldTwelveItemFallbackToNineRecoItems [FAIL]
+[xUnit.net 00:01:00.04]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ScopedPlanning_M
+issingNamedDishAsksInsteadOfSubstituting [FAIL]
+[xUnit.net 00:01:00.05]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ProviderFailures
+_DoNotRepairOrReplacePreview [FAIL]
+[xUnit.net 00:01:00.06]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ProviderSchemaFa
+ilure_RepairsOnceAndPreservesPreview [FAIL]
+[xUnit.net 00:01:00.08]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.CatalogChangesBe
+foreConfirm_BlockWithoutWritingRoadmap [FAIL]
+[xUnit.net 00:01:00.09]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Greetin
+gAndOutOfScope_KeepPreviewSavable [FAIL]
+[xUnit.net 00:01:00.10]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_LongCon
+versation_ReloadRestoresEveryMessage [FAIL]
+[xUnit.net 00:01:00.11]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.AmbiguousReferen
+ce_RequiresClarificationBeforeCommit [FAIL]
+[xUnit.net 00:01:00.12]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_SaveWis
+hOverOpenQuestion_SavesReviewedPreview [FAIL]
+[xUnit.net 00:01:00.14]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.QuotaAcrossConve
+rsations_Returns429WithRetryAfter [FAIL]
+[xUnit.net 00:01:00.15]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ExpiryAndGet_RespectShortTermMemoryPolicy 
+[FAIL]
+[xUnit.net 00:01:00.16]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.FailedTurnRetry_UsesSameLogicalMessage 
+[FAIL]
+[xUnit.net 00:01:00.17]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ChatOnly_Constra
+intChange_AppliesAndStalePlanIsNotSaved [FAIL]
+[xUnit.net 00:01:00.19]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.Confirm_WithStartDate_StoresItOnTheRoadmap 
+[FAIL]
+[xUnit.net 00:01:00.20]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ConcurrentConfirm_HasOneBusinessEffect 
+[FAIL]
+[xUnit.net 00:01:00.21]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.DiscardAndReset_KeepOfficialRoadmap [FAIL]
+[xUnit.net 00:01:00.22]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.ActiveCleanup_Pr
+eservesReplayAndCountersWithoutRenewingActivity [FAIL]
+[xUnit.net 00:01:00.23]     ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.Cleanup_ExpiresW
+ithoutRenewingActivityAndSkipsLiveLeases [FAIL]
+[xUnit.net 00:01:00.25]     
+ANGI.IntegrationTests.WebApi.Controllers.Agent.AgentConversationsHttpTests.DayTwoLunchPatch_PreservesOtherDays [FAIL]
+[xUnit.net 00:01:00.32]     
+ANGI.IntegrationTests.EndToEnd.PagingEndToEndTests.Lists_WithLargestPage_ShouldReturnEmptyPage [FAIL]
+[xUnit.net 00:01:00.40]     ANGI.IntegrationTests.EndToEnd.VerificationModerationEndToEndTests.ReviewVerificationWorkfl
+ow_ShouldPersistDecisionNotificationAndAudit [FAIL]
+[xUnit.net 00:01:00.41]     
+ANGI.IntegrationTests.EndToEnd.VerificationModerationEndToEndTests.AdminAccess_ShouldReturnForbiddenWithoutSideEffects 
+[FAIL]
+[xUnit.net 00:01:00.43]     
+ANGI.IntegrationTests.EndToEnd.VerificationModerationEndToEndTests.Decide_WhenRequestsRace_ShouldCommitExactlyOnce 
+[FAIL]
+[xUnit.net 00:01:00.50]     ANGI.IntegrationTests.Infrastructure.Persistences.Migrations.AddConversationPreferencesLife
+cycleTests.Upgrade_DetectsDuplicatesWithoutDeletingData_ThenBackfillsCounters [FAIL]
+
+Failed!  - Failed:   207, Passed:   188, Skipped:     4, Total:   399, Duration: 58 s - ANGI.IntegrationTests.dll (net10.0)
+TEST_EXIT=1

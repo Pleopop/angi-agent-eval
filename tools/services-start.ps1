@@ -1,0 +1,54 @@
+param([Parameter(Mandatory)][string]$RunId, [string]$Mode='dry', [long]$TokenCap=0, [string[]]$Versions=@('v11','v20','v30'))
+# Starts the proxy and the three backends from E:\ANGI-Agent-Eval only.
+# APPDATA points at an empty folder, so the developer's user secrets are never loaded.
+$R='E:\ANGI-Agent-Eval'
+$run="$R\runs\$RunId"
+New-Item -ItemType Directory -Force $run | Out-Null
+$s=@{}
+Get-Content "$R\.secrets.env" | ForEach-Object { if($_ -match '^([A-Z_]+)=(.*)$'){ $s[$matches[1]]=$matches[2].Trim('"',"'") } }
+$env:EVAL_MODE=$Mode
+$env:EVAL_CALLS="$run\calls.jsonl"
+$env:EVAL_TOKEN_CAP="$TokenCap"
+$pids=@()
+if($Mode -eq 'dry'){
+  $pids+=(Start-Process node -ArgumentList "$R\tools\fake-openai.mjs" -WindowStyle Hidden -PassThru -RedirectStandardOutput "$run\fake.out" -RedirectStandardError "$run\fake.err").Id
+  $apiKey='fake-key'
+} else {
+  if($env:EVAL_ALLOW_PAID -ne 'yes' -or -not $env:EVAL_OPENAI_KEY -or $TokenCap -le 0){ throw 'Live run needs EVAL_ALLOW_PAID=yes, EVAL_OPENAI_KEY and -TokenCap' }
+  $apiKey=$env:EVAL_OPENAI_KEY
+}
+$pids+=(Start-Process node -ArgumentList "$R\tools\proxy.mjs" -WindowStyle Hidden -PassThru -RedirectStandardOutput "$run\proxy.out" -RedirectStandardError "$run\proxy.err").Id
+$slot=@{ v11=1; v20=2; v30=3; v31=4 }
+foreach($v in $Versions){
+  $i=$slot[$v]
+  $e=[ordered]@{
+    ASPNETCORE_ENVIRONMENT='Development'
+    ASPNETCORE_URLS="http://127.0.0.1:520$i"
+    APPDATA="$R\empty-appdata"
+    ConnectionStrings__Default="Host=127.0.0.1;Port=55432;Database=angi_eval_$v;Username=angi_backend;Password=$($s.PG_BACKEND)"
+    Jwt__SecretKey=$s.JWT_KEY
+    Recommendation__BaseUrl="http://127.0.0.1:1811$i/"
+    Recommendation__ApiKey=$s.RECO_KEY
+    Ai__BaseUrl="http://127.0.0.1:18100/run/$v/v1/"
+    Ai__ApiKey=$apiKey
+    Ai__Model='gpt-6-luna'
+    Agent__MessagesPerMinute='1000'
+    Agent__MessagesPerDay='100000'
+    Agent__ReasoningEffort='none'
+    RateLimit__GeneralPermitLimit='100000'
+    RateLimit__ReadPermitLimit='100000'
+    RateLimit__LoginPermitLimit='1000'
+    Brevo__BaseUrl='http://127.0.0.1:9/'
+    Brevo__ApiKey='disabled'
+    Mapbox__BaseUrl='http://127.0.0.1:9/'
+    Mapbox__AccessToken='disabled'
+    Google__ClientId='disabled'
+    Cloudinary__CloudName='disabled'
+    Cloudinary__ApiKey='disabled'
+    Cloudinary__ApiSecret='disabled'
+  }
+  foreach($k in $e.Keys){ Set-Item "env:$k" $e[$k] }
+  $pids+=(Start-Process "$R\build\$v\ANGI.WebApi.exe" -WorkingDirectory "$R\build\$v" -WindowStyle Hidden -PassThru -RedirectStandardOutput "$run\backend-$v.out" -RedirectStandardError "$run\backend-$v.err").Id
+}
+$pids -join ',' | Set-Content "$run\pids.txt"
+"started pids=$($pids -join ',')"

@@ -1,0 +1,29 @@
+{
+  "runId": "round-3/v31",
+  "scenarios": [
+    "edit-add-dish",
+    "edit-add-meal"
+  ],
+  "v31": {
+    "scenarios": 4,
+    "passed": 4,
+    "setupFailed": 0,
+    "turns": 8,
+    "formatOkTurns": 8,
+    "faithfulTurns": 8,
+    "dishClaims": 0,
+    "dishClaimsVerified": 0,
+    "falseSaves": 0,
+    "calls": 29,
+    "inputTokens": 501633,
+    "cachedTokens": 406647,
+    "outputTokens": 9517,
+    "totalTokens": 511150,
+    "outputTokensPerScenario": 2379.25,
+    "tokensPerScenario": 127787.5,
+    "turnMsMedian": 14493,
+    "turnMsP95": 22881,
+    "costUsd": 0.018324,
+    "costPerScenarioUsd": 0.004581
+  }
+}

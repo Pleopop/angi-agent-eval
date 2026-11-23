@@ -1,0 +1,23 @@
+{
+  "catalogDishes": 1040,
+  "proposals": {
+    "v11": {
+      "proposals": 5,
+      "items": 31,
+      "mismatched": 0,
+      "examples": []
+    },
+    "v20": {
+      "proposals": 8,
+      "items": 51,
+      "mismatched": 0,
+      "examples": []
+    },
+    "v30": {
+      "proposals": 4,
+      "items": 26,
+      "mismatched": 0,
+      "examples": []
+    }
+  }
+}

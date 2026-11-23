@@ -1,0 +1,20 @@
+﻿{
+    "runId":  "round-3/v11-v20-v30",
+    "startedAt":  "2026-11-23T11:14:15.2455970+07:00",
+    "model":  "gpt-6-luna",
+    "mode":  "live",
+    "versions":  {
+                     "v11":  "9106735",
+                     "v20":  "0706765",
+                     "v30":  "3214648"
+                 },
+    "seedDump":  "angi-prod-sync-20261123.dump",
+    "dataAdjustments":  "V1.1 and V2.0 databases: tags of types meal_role, cooking_method and ingredient removed (tools/legacy-tags.sh)",
+    "seedDumpSha256":  "5e3238a8893fc5d19dac7b6a7a53dd7e5d8a723a85613c10b3480ecde07c6369",
+    "scenarios":  [
+                      "edit-add-dish",
+                      "edit-add-meal"
+                  ],
+    "repeats":  2,
+    "tokenCap":  2000000
+}

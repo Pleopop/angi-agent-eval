@@ -1,0 +1,24 @@
+{
+ "createdAt": "2026-11-19T10:39:02+07:00",
+ "versions": {
+  "v11": "9106735",
+  "v20": "0706765",
+  "v30": "3214648",
+  "v31": "c75f9b6"
+ },
+ "recoCommit": "d745b8a plus the working-tree recommendations.py (sha256 prefix 9a56a5e1b7101785)",
+ "model": "gpt-6-luna",
+ "scenarios": 20,
+ "dryRun": "dry-2",
+ "liveRuns": 0,
+ "v31Note": "origin/dev merge of PR #146: V3.0 3214648 plus b2f4e60, 994ce5e, c3199ff, 8c6e1ad, ca69ec5",
+ "runs": {
+  "round-1": "Evaluation Round 1, 23/11/2026, V1.1 V2.0 V3.0, 20 x 1",
+  "round-2": "Evaluation Round 2, 23/11/2026, V3.0 and V3.1 at 994ce5e, 10 x 2",
+  "round-3/v11-v20-v30": "Evaluation Round 3, 23/11/2026, V1.1 V2.0 V3.0, 2 x 2",
+  "round-3/v31": "Evaluation Round 3, 23/11/2026, V3.1 at c75f9b6, 8 x 2"
+ },
+ "seedDump": "seed/angi-prod-sync-20261123.dump (production snapshot, 23/11/2026; sha256 in each run-info.json)",
+ "catalogDishes": 1040,
+ "dataAdjustment": "V1.1 and V2.0 databases: meal_role, cooking_method and ingredient tags removed (tools/legacy-tags.sh)"
+}
