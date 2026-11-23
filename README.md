@@ -1,5 +1,7 @@
 # ANGI Agent evaluation
 
+Hướng dẫn sử dụng bằng tiếng Việt: [HUONG-DAN.md](HUONG-DAN.md).
+
 Isolated harness comparing V1.1 (`9106735`), V2.0 (`0706765`), V3.0 (`3214648`) and V3.1 (`c75f9b6`, dev after PR #146). Nothing here runs inside `E:\CapStone`.
 
 ## Parts
