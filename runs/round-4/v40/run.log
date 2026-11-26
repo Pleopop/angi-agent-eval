@@ -1,0 +1,16 @@
+r1 after  c13 conv=133 turns=5 http=200,200,200,200,200
+r1 after  c14 conv=134 turns=4 http=200,200,200,200
+r1 after  c16 conv=135 turns=6 http=200,200,200,200,200,200
+r1 after  c17 conv=136 turns=7 http=200,200,200,200,200,200,200
+r1 after  c19 conv=137 turns=3 http=200,200,200
+r1 after  c20 conv=138 turns=5 http=200,200,200,200,200
+r1 after  c21 conv=139 turns=5 http=200,200,200,200,200
+done calls=121 tokens=2960718
+r2 after  c13 conv=140 turns=5 http=200,200,200,200,200
+r2 after  c14 conv=141 turns=3 http=200,200,200
+r2 after  c16 conv=142 turns=6 http=200,200,200,200,200,200
+r2 after  c17 conv=143 turns=9 http=200,200,200,200,200,200,200,200,200
+r2 after  c19 conv=144 turns=3 http=200,200,200
+r2 after  c20 conv=145 turns=5 http=200,200,200,200,200
+r2 after  c21 conv=146 turns=5 http=200,200,200,200,200
+done calls=237 tokens=6018310

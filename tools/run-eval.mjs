@@ -1,9 +1,9 @@
 // Sends the same scenarios to every version through its public API and scores what the user receives.
 // usage: node run-eval.mjs <runId> [--versions v11,v20,v30] [--repeats 1] [--only id,id]
-import fs from 'node:fs';
+import fs from 'node:fs'; import { execFileSync } from 'node:child_process';
 
 const ROOT = 'E:/ANGI-Agent-Eval', PROXY = 'http://127.0.0.1:18100';
-const PORTS = { v11: 5201, v20: 5202, v30: 5203, v31: 5204 };
+const PORTS = { v11: 5201, v20: 5202, v30: 5203, v31: 5204, v40: 5205 };
 const args = process.argv.slice(2), runId = args[0];
 const opt = (n, d) => { const i = args.indexOf('--' + n); return i > 0 ? args[i + 1] : d; };
 if (!runId) throw new Error('runId is required');
@@ -30,7 +30,15 @@ async function api(base, path, token, body) {
 const ctx = c => fetch(`${PROXY}/__ctx`, { method: 'POST', body: JSON.stringify(c) });
 const any = (text, list) => list.some(p => new RegExp(p, 'iu').test(text));
 const expand = s => s.turns.flatMap(t => t.use ? cfg.setup[t.use].map(x => ({ ...x, setup: true })) : [t]);
-const allowed = (w, st) => !w || (w === 'noProposal' && !st.proposal) || (w === 'hasProposal' && st.proposal) || (w === 'notCommitted' && st.proposal && !st.committed);
+// After every turn the latest draft, the dishes the latest suggestion offered and the trip length are read from the version's own database,
+// so conversation and area scenarios are scored on data, not on wording. Fields an older version lacks are null.
+const sql = (v, q) => execFileSync('docker', ['exec', 'angi-eval-pg', 'psql', '-U', 'postgres', '-d', `angi_eval_${v}`, '-At', '-c', q], { encoding: 'utf8', maxBuffer: 64e6 }).trim();
+const snapshot = (v, id) => JSON.parse(sql(v, `select json_build_object('offered', state->'offeredDishes', 'lists', state->'offeredLists', 'numDays', state->'numDays',
+  'draft', (select json_build_object('id', p.id, 'items', p.payload->'items') from core.agent_proposals p where p.conversation_id=c.id order by p.id desc limit 1),
+  'committed', (select count(*) from core.agent_proposals p where p.conversation_id=c.id and p.status='committed')) from core.agent_conversations c where id=${id}`) || '{}');
+const allowed = (w, st, prev, lastTurn) => !w || (w === 'noProposal' && !st.proposal) || (w === 'hasProposal' && st.proposal) || (w === 'notCommitted' && st.proposal && !st.committed) ||
+  (w === 'noNewDraft' && !!lastTurn && !lastTurn.newDraft) ||
+  (w === 'noFullDraft' && !(prev.draft && (prev.numDays ?? 0) > 1 && (prev.draft.items?.length ?? 0) >= prev.numDays * 3));
 
 function checkTurn(e, r, problems, label) {
   if (!e) return;
@@ -66,20 +74,21 @@ for (let rep = 1; rep <= repeats && !stopped; rep++) {
     {
       const conv = await api(base, '/api/v1/agent/conversations', token, { roadmapId: null });
       const row = { runId, repeat: rep, version: v, scenario: s.id, kind: s.kind, conversationId: conv.data?.conversationId ?? null, turns: [], problems: [] };
-      const st = { proposal: false, committed: false }; let last = null, n = 0;
+      const st = { proposal: false, committed: false }; let last = null, n = 0, prev = { draft: null };
       if (!conv.ok) row.problems.push(`conversation failed: ${conv.http} ${conv.errorCode}`);
       else for (const t of expand(s)) {
-        if (!allowed(t.when, st)) continue;
+        if (!allowed(t.when, st, prev, last)) continue;
         n++; await ctx({ version: v, repeat: rep, scenario: s.id, kind: s.kind, turn: n, setup: !!t.setup });
         const r = await api(base, `/api/v1/agent/conversations/${row.conversationId}/messages`, token, { clientMessageId: ++nextClientId, content: t.text, command: 'chat' });
         const d = r.data || {};
-        const res = { turn: n, text: t.text, setup: !!t.setup, http: r.http, ms: r.ms, ok: r.ok, status: d.status ?? null, errorCode: r.errorCode, reply: d.reply ?? '', proposalId: d.proposal?.proposalId ?? null, committed: !!d.commit };
-        row.turns.push(res); last = res;
+        const after = row.conversationId ? snapshot(v, row.conversationId) : {};
+        const res = { turn: n, text: t.text, tag: t.tag ?? null, setup: !!t.setup, newDraft: (after.draft?.id ?? null) !== (prev.draft?.id ?? null), before: prev, after, http: r.http, ms: r.ms, ok: r.ok, status: d.status ?? null, errorCode: r.errorCode, reply: d.reply ?? '', proposalId: d.proposal?.proposalId ?? null, committed: !!d.commit };
+        row.turns.push(res); last = res; prev = after;
         if (!r.ok) row.problems.push(`turn ${n}: HTTP ${r.http} ${r.errorCode || ''}`.trim());
         if (res.proposalId) st.proposal = true; if (res.committed) st.committed = true;
         checkTurn(t.expect, res, row.problems, `turn ${n}`);
       }
-      await ctx({});
+      await ctx({ version: v });
       checkScenario(s.expect, st, last, row.problems);
       row.passed = row.problems.length === 0; row.state = st;
       fs.appendFileSync(out, JSON.stringify(row) + '\n');

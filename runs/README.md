@@ -8,6 +8,7 @@ Folders follow the three rounds in "III. AI Assistant Optimization". Raw files i
 | `round-2/` | Evaluation Round 2, 23/11/2026 | V3.0, V3.1 at `994ce5e` | 10 × 2 | — | 5.2 |
 | `round-3/v11-v20-v30/` | Evaluation Round 3, 23/11/2026 | V1.1, V2.0, V3.0 | 2 × 2 | — | 5.3 |
 | `round-3/v31/` | Evaluation Round 3, 23/11/2026 | V3.1 at `c75f9b6` | 8 × 2 | — | 5.3 |
+| `round-4/` | Evaluation Round 4, 26/11/2026 | V3.1 at `c75f9b6`, V4.0 at `16efd35` | conversation replays, see `round-4/README.md` | `conv-run`, `compare`, `conv-run7` | 4.5, 5.5 |
 
 All three rounds ran on the real model (gpt-6-luna) against one snapshot of the production database taken on 23/11/2026 (`seed/angi-prod-sync-20261123.dump`, never published: it holds real user data). V1.1 and V2.0 cannot read the meal_role, cooking_method and ingredient tag types, so `tools/legacy-tags.sh` removes those 25 tags from their two databases only. Each folder has a `run-info.json` with the commits, the snapshot checksum and that adjustment. The earlier rounds on local data (19 and 22/11) were deleted on 23/11/2026.
 

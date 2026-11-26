@@ -1,0 +1,20 @@
+r1 before c10 conv=69 turns=11 http=200,200,200,200,200,200,200,200,200,200,200
+r1 after  c10 conv=70 turns=11 http=200,200,200,200,200,200,200,200,200,200,200
+r1 after  c11 conv=71 turns=6 http=200,200,200,200,200,200
+r1 before c11 conv=72 turns=6 http=200,200,200,200,200,200
+r1 before c12 conv=73 turns=8 http=200,200,200,200,200,200,200,200
+r1 after  c12 conv=74 turns=8 http=200,200,200,200,200,200,200,200
+r1 after  c13 conv=75 turns=5 http=200,200,200,200,200
+r1 before c13 conv=76 turns=6 http=200,200,200,200,200,200
+r1 before c14 conv=77 turns=5 http=200,200,200,200,200
+r1 after  c14 conv=78 turns=3 http=200,200,200
+r1 after  c15 conv=79 turns=5 http=200,200,200,200,200
+r1 before c15 conv=80 turns=6 http=200,200,200,200,200,200
+done calls=285 tokens=5145029
+r2 after  c10 conv=81 turns=11 http=200,200,200,200,200,200,200,200,200,200,200
+r2 after  c11 conv=82 turns=6 http=200,200,200,200,200,200
+r2 after  c12 conv=83 turns=8 http=200,200,200,200,200,200,200,200
+r2 after  c13 conv=84 turns=5 http=200,200,200,200,200
+r2 after  c14 conv=85 turns=3 http=200,200,200
+r2 after  c15 conv=86 turns=6 http=200,200,200,200,200,200
+done calls=408 tokens=7406173
