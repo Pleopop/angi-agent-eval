@@ -18,7 +18,10 @@ if($Mode -eq 'dry'){
   $apiKey=$env:EVAL_OPENAI_KEY
 }
 $pids+=(Start-Process node -ArgumentList "$R\tools\proxy.mjs" -WindowStyle Hidden -PassThru -RedirectStandardOutput "$run\proxy.out" -RedirectStandardError "$run\proxy.err").Id
-$slot=@{ v11=1; v20=2; v30=3; v31=4 }
+$slot=@{ v11=1; v20=2; v30=3; v31=4; v40=5 }
+# Place search: the real Mapbox when EVAL_MAPBOX_TOKEN is set (the area scenarios name streets and zones), otherwise disabled.
+$mapboxUrl = if ($env:EVAL_MAPBOX_TOKEN) { 'https://api.mapbox.com/' } else { 'http://127.0.0.1:9/' }
+$mapboxToken = if ($env:EVAL_MAPBOX_TOKEN) { $env:EVAL_MAPBOX_TOKEN } else { 'disabled' }
 foreach($v in $Versions){
   $i=$slot[$v]
   $e=[ordered]@{
@@ -40,8 +43,8 @@ foreach($v in $Versions){
     RateLimit__LoginPermitLimit='1000'
     Brevo__BaseUrl='http://127.0.0.1:9/'
     Brevo__ApiKey='disabled'
-    Mapbox__BaseUrl='http://127.0.0.1:9/'
-    Mapbox__AccessToken='disabled'
+    Mapbox__BaseUrl=$mapboxUrl
+    Mapbox__AccessToken=$mapboxToken
     Google__ClientId='disabled'
     Cloudinary__CloudName='disabled'
     Cloudinary__ApiKey='disabled'

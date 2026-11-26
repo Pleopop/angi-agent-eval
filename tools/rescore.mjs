@@ -1,6 +1,6 @@
 // Second scoring pass over results.jsonl: checks every reply against the catalog and the stored proposals.
 // usage: node rescore.mjs <runId>   -> writes scored.jsonl, facts.json and metrics.json in the run folder
-import fs from 'node:fs'; import { execFileSync } from 'node:child_process'; import { addCost, PRICE } from './cost.mjs';
+import fs from 'node:fs'; import { execFileSync } from 'node:child_process'; import { addCost, PRICE } from './cost.mjs'; import { makeChecks } from './checks.mjs';
 const runId = process.argv[2], dir = `E:/ANGI-Agent-Eval/runs/${runId}`;
 const rd = f => fs.readFileSync(f, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
 const R = rd(`${dir}/results.jsonl`), C = fs.existsSync(`${dir}/calls.jsonl`) ? rd(`${dir}/calls.jsonl`) : [];
@@ -8,7 +8,10 @@ const sql = (db, q) => execFileSync('docker', ['exec', 'angi-eval-pg', 'psql', '
 const norm = s => (s || '').normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim();
 
 // Catalog is identical in the three databases (same dump, checked by md5); read it once.
-const catalog = JSON.parse(sql('angi_eval_v20', "select coalesce(json_agg(json_build_object('id',d.id,'name',d.name,'price',d.price,'restaurant',r.name)),'[]') from core.dishes d join core.restaurants r on r.id=d.restaurant_id"));
+// Read from the newest version's database: it keeps every tag type (V1.1 and V2.0 copies lost three) and the restaurant coordinates.
+const catalogDb = [...new Set(R.map(r => r.version))].sort().map(v => `angi_eval_${v}`).at(-1);
+const catalog = JSON.parse(sql(catalogDb, "select coalesce(json_agg(json_build_object('id',d.id,'name',d.name,'price',d.price,'restaurant',r.name,'lat',r.latitude,'lng',r.longitude,'ward',r.ward,'tags',(select coalesce(json_agg(t.code),'[]') from core.dish_tags x join core.tags t on t.id=x.tag_id where x.dish_id=d.id))),'[]') from core.dishes d join core.restaurants r on r.id=d.restaurant_id"));
+const dataChecks = makeChecks(catalog);
 const byName = new Map(); for (const d of catalog) { const k = norm(d.name); byName.set(k, [...(byName.get(k) || []), d]); }
 const byId = new Map(catalog.map(d => [d.id, d]));
 
@@ -64,8 +67,11 @@ const scored = R.map(r => {
     turnFacts.push(f);
   }
   const added = addProblem(r); if (added) problems.push(added);
+  // Area and conversation scenarios: every data check must pass (see checks.mjs).
+  const checks = dataChecks(r); for (const c of checks.filter(c => !c.pass)) problems.push(`check ${c.tag}: ${c.note}`);
+  if ((r.kind === 'area' || r.kind === 'conversation') && !checks.length) problems.push('no data check could be made');
   const setupFailed = r.turns.some(t => t.setup) && !r.turns.some(t => t.setup && t.proposalId);
-  return { ...r, problems, passed: problems.length === 0, setupFailed, turnFacts };
+  return { ...r, problems, passed: problems.length === 0, setupFailed, turnFacts, checks };
 });
 fs.writeFileSync(`${dir}/scored.jsonl`, scored.map(x => JSON.stringify(x)).join('\n') + '\n');
 
@@ -76,7 +82,7 @@ for (const v of [...new Set(R.map(r => r.version))].sort()) {
   const cs = C.filter(c => c.route === v && c.scenario), claimsAll = facts.flatMap(f => f.claims);
   const perScenario = rs.map(r => cs.filter(c => c.scenario === r.scenario && c.repeat === r.repeat));
   metrics[v] = {
-    scenarios: rs.length, passed: rs.filter(r => r.passed).length, setupFailed: rs.filter(r => r.setupFailed).length,
+    scenarios: rs.length, passed: rs.filter(r => r.passed).length, checks: rs.reduce((a, r) => a + r.checks.length, 0), checksPassed: rs.reduce((a, r) => a + r.checks.filter(c => c.pass).length, 0), setupFailed: rs.filter(r => r.setupFailed).length,
     turns: turns.length, formatOkTurns: facts.filter(f => f.formatOk).length, faithfulTurns: facts.filter(f => f.faithful).length,
     dishClaims: claimsAll.length, dishClaimsVerified: claimsAll.filter(c => c.ok).length, falseSaves: facts.filter(f => f.falseSave).length, slotTurns: facts.filter(f => f.slot).length,
     proposalItems: proposals[v].items, proposalItemsMismatched: proposals[v].mismatched,

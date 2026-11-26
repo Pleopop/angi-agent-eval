@@ -18,14 +18,16 @@ end \$\$;
 S
 docker exec angi-eval-pg mkdir -p /seed; docker cp "$DUMP" angi-eval-pg:/seed/base.dump >/dev/null
 $P -c "alter role angi_backend set search_path=core,public" -c "alter role angi_reco set search_path=recommendation,public"
-for v in v11 v20 v30; do
+VS="${VERSIONS:-v11 v20 v30 v31 v40}"
+for v in $VS; do
   db=angi_eval_$v
   docker exec angi-eval-pg psql -U postgres -c "drop database if exists $db with (force)" -q
   docker exec angi-eval-pg createdb -U postgres $db
   docker exec angi-eval-pg pg_restore -U postgres -d $db /seed/base.dump > $R/runs/_setup/restore-$v.log 2>&1 || true
   echo "$v restore_errors=$(grep -c 'error:' $R/runs/_setup/restore-$v.log || true)"
+  docker exec angi-eval-pg psql -U postgres -d $db -q -c 'truncate table core.agent_proposals, core.agent_messages, core.agent_conversations restart identity'
 done
-i=0; for v in v11 v20 v30; do i=$((i+1)); n=angi-eval-reco-$v; docker rm -f $n >/dev/null 2>&1 || true
+for v in $VS; do case $v in v11) i=1;; v20) i=2;; v30) i=3;; v31) i=4;; v40) i=5;; esac; n=angi-eval-reco-$v; docker rm -f $n >/dev/null 2>&1 || true
   docker run -d --name $n --network angi-eval -p 127.0.0.1:1811$i:8000 -e DATABASE_URL="postgresql://angi_reco:$PG_RECO@angi-eval-pg:5432/angi_eval_$v" -e RECO_API_KEY="$RECO_KEY" -e LLM_BASE_URL=http://127.0.0.1:9/v1/ -e LLM_TIMEOUT_SECONDS=1 -e ENVIRONMENT=development -e LOG_LEVEL=INFO -e PYTHONDONTWRITEBYTECODE=1 -e PYTHONPATH=/srv/angi-source -v E:/ANGI-Agent-Eval/src/reco:/srv/angi-source:ro angi-reco-runtime:local >/dev/null
 done
 sleep 6; docker ps --filter name=angi-eval --format '{{.Names}} {{.Status}} {{.Ports}}'

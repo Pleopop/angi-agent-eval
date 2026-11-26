@@ -2,24 +2,26 @@
 
 Hướng dẫn sử dụng bằng tiếng Việt: [HUONG-DAN.md](HUONG-DAN.md).
 
-Isolated harness comparing V1.1 (`9106735`), V2.0 (`0706765`), V3.0 (`3214648`) and V3.1 (`c75f9b6`, dev after PR #146). Nothing here runs inside `E:\CapStone`.
+Isolated harness comparing V1.1 (`9106735`), V2.0 (`0706765`), V3.0 (`3214648`), V3.1 (`c75f9b6`, dev after PR #146) and V4.0 (`16efd35`, branch fix/ANGI-231-agent-edit-plan). Nothing here runs inside `E:\CapStone`.
 
 ## Parts
 
 | Part | Location |
 | --- | --- |
 | Exported source and builds | `src\`, `build\` (one folder per version) |
-| Database and reco | Docker containers `angi-eval-pg`, `angi-eval-reco-v11`, `-v20`, `-v30`, `-v31` |
-| Backends | Ports 5201 (V1.1), 5202 (V2.0), 5203 (V3.0), 5204 (V3.1) |
-| Token proxy | Port 18100, writes `runs\<id>\calls.jsonl` |
-| Scenarios | `tools\scenarios.json` (22 scenarios) |
+| Database and reco | Docker containers `angi-eval-pg`, `angi-eval-reco-v11`, `-v20`, `-v30`, `-v31`, `-v40` |
+| Backends | Ports 5201 (V1.1), 5202 (V2.0), 5203 (V3.0), 5204 (V3.1), 5205 (V4.0); one runner process per version, in parallel |
+| Token proxy | Port 18100, writes `runs\<id>\calls.jsonl` and labels each call by its version route |
+| Place search | Real Mapbox when the angi-backend user secrets hold `Mapbox:AccessToken` (the area scenarios name streets and zones) |
+| Scenarios | `tools\scenarios.json` (36 scenarios: 22 single requests and short flows, 7 area scenarios, 7 replayed user conversations); data checks in `tools\checks.mjs` |
 | Results | `runs\<id>\`; `runs\README.md` maps each folder to its round in the report |
 
 ## Rerun a round on the real model (one command)
 
 ```powershell
-E:\ANGI-Agent-Eval\tools\rerun.ps1 -RunId round-4              # 22 scenarios x 4 versions x 1 run
-E:\ANGI-Agent-Eval\tools\rerun.ps1 -RunId round-4 -Repeats 2   # two runs per scenario
+E:\ANGI-Agent-Eval\tools\rerun.ps1 -RunId unified-2              # 36 scenarios x 5 versions x 1 run
+E:\ANGI-Agent-Eval\tools\rerun.ps1 -RunId unified-2 -Repeats 3   # three runs per scenario
+node E:\ANGI-Agent-Eval\tools\summary.mjs unified-2               # report tables (summary.md) after the run
 E:\ANGI-Agent-Eval\tools\rerun.ps1 -RunId try-1 -Versions v31 -Only edit-add-dish,edit-add-meal
 ```
 
