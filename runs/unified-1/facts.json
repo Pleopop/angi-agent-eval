@@ -1,0 +1,42 @@
+{
+  "catalogDishes": 1040,
+  "proposals": {
+    "v11": {
+      "proposals": 46,
+      "items": 276,
+      "mismatched": 0,
+      "examples": []
+    },
+    "v20": {
+      "proposals": 91,
+      "items": 693,
+      "mismatched": 0,
+      "examples": []
+    },
+    "v30": {
+      "proposals": 90,
+      "items": 662,
+      "mismatched": 0,
+      "examples": []
+    },
+    "v31": {
+      "proposals": 106,
+      "items": 818,
+      "mismatched": 0,
+      "examples": []
+    },
+    "v40": {
+      "proposals": 117,
+      "items": 1025,
+      "mismatched": 0,
+      "examples": []
+    }
+  },
+  "priceUsdPerMillionTokens": {
+    "model": "gpt-6-luna",
+    "unit": "USD per million tokens",
+    "input": 0.1,
+    "cachedInput": 0.01,
+    "output": 0.5
+  }
+}

@@ -41,13 +41,21 @@ function addProblem(r) {
 }
 
 // 2. Claims inside replies: "<dish> ở|tại <restaurant> ..., khoảng <price> đồng" must match one catalog dish.
-const claimRe = /([A-ZÀ-Ỹ][^;:.\n{}]*?) (?:ở|tại) ([^,(;\n]+?)(?: \([^)]*\))?, khoảng ([\d.]+) đồng/gu;
+// V4.0 lists "- <dish> (hợp bữa trưa, bữa tối) ở <restaurant> (<address>), khoảng <price>": the meal note is not part of the name,
+// and a restaurant name may itself end in brackets ("Vị Quảng (Nhà hàng 13 năm tuổi) (Phố Ngô Quyền)").
+const claimRe = /([A-ZÀ-Ỹ][^;:.\n{}]*?) (?:ở|tại) ([^,(;\n]+?)(?: \([^)]*\))*, khoảng ([\d.]+) đồng/gu;
 function claims(text) {
   const out = []; for (const m of (text || '').normalize('NFC').replace(/ hoặc /giu, '; ').matchAll(claimRe)) {
-    const name = norm(m[1].replace(/^(bạn (có thể )?thử|mình gợi ý|- )\s*/i, '').replace(/^.*(?:thử|nhé:|nè:|nè|:)\s*/i, ''));
+    const name = norm(m[1].replace(/^(bạn (có thể )?thử|mình gợi ý|- )\s*/i, '').replace(/^.*(?:thử|nhé:|nè:|nè|:)\s*/i, '').replace(/\s*\(hợp [^)]*\)$/u, ''));
     const price = Number(m[3].replace(/\./g, '')), rest = norm(m[2]);
-    const hits = byName.get(name) || [];
+    // A lead-in the prefix rules miss ("bạn có thể tham khảo …", "có nhé, quanh bạch mai có …") stays in front of the name:
+    // then the longest catalog name that ends the captured text, at a word boundary, is the dish.
+    let hits = byName.get(name) || [];
+    if (!hits.length) { const tail = [...byName.keys()].filter(k => k.length >= 4 && (name === k || name.endsWith(' ' + k))).sort((a, b) => b.length - a.length)[0]; if (tail) hits = byName.get(tail); }
     const ok = hits.some(d => Number(d.price) === price && (norm(d.restaurant) === rest || norm(d.restaurant).startsWith(rest) || rest.startsWith(norm(d.restaurant))));
+    // The lazy match can stop at an earlier "ở" ("độ cay ở mức vừa nhé. Bạn thử Bò Cuốn Cải ở …"): retry on the text after that word.
+    const cut = m[0].search(/ (?:ở|tại) /u);
+    if (!ok && !hits.length && cut > 0) { const again = claims(m[0].slice(cut + 3).replace(/^\S*\s*/, '')); if (again.length) { out.push(...again); continue; } }
     out.push({ name, restaurant: rest, price, ok, known: hits.length > 0 });
   }
   return out;

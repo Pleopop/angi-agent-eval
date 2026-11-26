@@ -1,0 +1,86 @@
+﻿Run:            runs\unified-1
+Versions:       v11, v20, v30, v31, v40
+Scenarios:      36 x 3 run(s) = 540 conversations
+Expected:       about 78,600,000 tokens, about USD 4.72
+Token cap:      125,760,000 tokens, at most about USD 7.55
+
+== Fresh databases and reco containers
+v11 restore_errors=0
+v20 restore_errors=0
+v30 restore_errors=0
+v31 restore_errors=0
+v40 restore_errors=0
+angi-eval-reco-v40 Up 6 seconds 127.0.0.1:18115->8000/tcp
+angi-eval-reco-v31 Up 8 seconds 127.0.0.1:18114->8000/tcp
+angi-eval-reco-v30 Up 9 seconds 127.0.0.1:18113->8000/tcp
+angi-eval-reco-v20 Up 11 seconds 127.0.0.1:18112->8000/tcp
+angi-eval-reco-v11 Up 13 seconds 127.0.0.1:18111->8000/tcp
+angi-eval-pg Up 19 hours 127.0.0.1:55432->5432/tcp
+
+== Clear Agent conversations
+v11 conversations=0
+v20 conversations=0
+v30 conversations=0
+v31 conversations=0
+v40 conversations=0
+
+== Add the evaluation test account
+v11 test user id=511
+v20 test user id=511
+v30 test user id=511
+v31 test user id=511
+v40 test user id=511
+
+== Drop tag types V1.1 and V2.0 cannot read
+v11 removed 25 tags of types unknown to it; left: category=16, dietary=2, meal_time=5
+v20 removed 25 tags of types unknown to it; left: category=16, dietary=2, meal_time=5
+
+== Start backends against the real model
+started pids=19332,4844,1364,23028,3112,21152
+v11 healthy
+v20 healthy
+v30 healthy
+v31 healthy
+v40 healthy
+
+== Run scenarios (one process per version)
+r3 v11 c19-two-dishes-one-meal PASS turns=5 
+r3 v11 c20-kind-on-a-day  PASS turns=7 
+r3 v11 c21-replace-and-remove PASS turns=6 
+r3 v20 c19-two-dishes-one-meal PASS turns=5 
+r3 v20 c20-kind-on-a-day  PASS turns=7 
+r3 v20 c21-replace-and-remove PASS turns=6 
+r3 v30 c19-two-dishes-one-meal PASS turns=5 
+r3 v30 c20-kind-on-a-day  PASS turns=7 
+r3 v30 c21-replace-and-remove PASS turns=6 
+r3 v31 c19-two-dishes-one-meal PASS turns=4 
+r3 v31 c20-kind-on-a-day  PASS turns=6 
+r3 v31 c21-replace-and-remove PASS turns=5 
+r3 v40 c19-two-dishes-one-meal PASS turns=3 
+r3 v40 c20-kind-on-a-day  PASS turns=5 
+r3 v40 c21-replace-and-remove PASS turns=5 
+
+== Rescore against the catalog and the stored drafts
+
+== Report
+# Evaluation report: unified-1
+
+Scenario runs: 540. Model calls: 3297. Calls without a scenario: 0. Calls with mismatched route: 0.
+
+| Version | Passed | Pass rate | Turns | Failed turns | Model calls | Input tokens | Cached | Output tokens | Total tokens | Tokens per scenario | Tokens per passed scenario | Median turn s | P90 turn s |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| v11 | 50/108 | 46.3% | 316 | 0 | 437 | 4,060,365 | 3,320,121 | 94,669 | 4,155,034 | 38,473 | 83,101 | 2.7 | 8.2 |
+| v20 | 60/108 | 55.6% | 281 | 1 | 725 | 10,076,820 | 7,157,477 | 188,483 | 10,265,303 | 95,049 | 171,088 | 6.4 | 13.7 |
+| v30 | 70/108 | 64.8% | 278 | 2 | 697 | 11,220,111 | 8,220,594 | 193,526 | 11,413,637 | 105,682 | 163,052 | 6.7 | 14.3 |
+| v31 | 76/108 | 70.4% | 258 | 1 | 725 | 12,900,438 | 8,787,392 | 198,986 | 13,099,424 | 121,291 | 172,361 | 7.7 | 15.8 |
+| v40 | 68/108 | 63.0% | 244 | 3 | 713 | 13,859,700 | 9,750,962 | 172,987 | 14,032,687 | 129,932 | 206,363 | 7.4 | 14.6 |
+
+## By scenario kind
+
+== Stop services
+stopped
+
+Done. Results: E:\ANGI-Agent-Eval\runs\unified-1
+  report.md     pass rate, tokens and latency per version
+  metrics.json  numbers for the summary tables (format, faithfulness, catalog checks)
+  rescore.log   scenarios that failed and why
