@@ -1,0 +1,2 @@
+r1 luna plan-full          PASS turns=1 
+r1 luna edit-add-dish      PASS turns=2 

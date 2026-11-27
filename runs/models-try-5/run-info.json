@@ -1,0 +1,59 @@
+{
+  "runId": "models-try-5",
+  "startedAt": "2026-11-27T12:29:12.6481000+07:00",
+  "mode": "live",
+  "upstream": "openrouter",
+  "agentCode": "V4.0 (16efd35), build\\v40 in every slot",
+  "models": {
+    "luna": "openai/gpt-6-luna",
+    "haiku": "anthropic/claude-haiku-5.5",
+    "gemini": "google/gemini-3.1-flash-lite"
+  },
+  "costCapsUsd": {
+    "luna": 0.05,
+    "haiku": 0.1,
+    "gemini": 0.15
+  },
+  "reasoningEffort": "none",
+  "providerPinning": "openai -> OpenAI, anthropic -> Anthropic (top-level automatic prompt caching), google -> Google AI Studio; no fallbacks",
+  "seedDump": "angi-prod-sync-20261123.dump",
+  "seedDumpSha256": "5e3238a8893fc5d19dac7b6a7a53dd7e5d8a723a85613c10b3480ecde07c6369",
+  "claudeAdaptation": "response_format json_schema -> json_object + the same schema as a system message; tool strict off (Anthropic limit: 16 union parameters, ANGI has 39)",
+  "geminiAdaptation": "response_format left out on forced tool calls only (Gemini rejects forced function calling with a JSON response type)",
+  "scenarios": [
+    "plan-full",
+    "edit-add-dish"
+  ],
+  "repeats": {
+    "haiku": 1,
+    "gemini": 1,
+    "luna": 1
+  },
+  "slots": {
+    "luna": {
+      "slot": "v30",
+      "build": "build\\v40 (V4.0, 16efd35)",
+      "database": "angi_eval_v30",
+      "recoContainer": "angi-eval-reco-v30",
+      "backendPort": 5203,
+      "proxyRoute": "/run/v30/v1/"
+    },
+    "haiku": {
+      "slot": "v31",
+      "build": "build\\v40 (V4.0, 16efd35)",
+      "database": "angi_eval_v31",
+      "recoContainer": "angi-eval-reco-v31",
+      "backendPort": 5204,
+      "proxyRoute": "/run/v31/v1/"
+    },
+    "gemini": {
+      "slot": "v40",
+      "build": "build\\v40 (V4.0, 16efd35)",
+      "database": "angi_eval_v40",
+      "recoContainer": "angi-eval-reco-v40",
+      "backendPort": 5205,
+      "proxyRoute": "/run/v40/v1/"
+    }
+  },
+  "slotsNote": "Labels luna/haiku/gemini name the model of each slot. All slots ran the same V4.0 build; v30/v31/v40 are only the database, reco container and port that slot used."
+}

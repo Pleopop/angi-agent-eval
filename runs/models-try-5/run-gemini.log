@@ -1,0 +1,2 @@
+r1 gemini plan-full          PASS turns=1 
+r1 gemini edit-add-dish      PASS turns=2 

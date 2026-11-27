@@ -1,4 +1,6 @@
-param([Parameter(Mandatory)][string]$RunId, [string]$Mode='dry', [long]$TokenCap=0, [string[]]$Versions=@('v11','v20','v30'))
+param([Parameter(Mandatory)][string]$RunId, [string]$Mode='dry', [long]$TokenCap=0, [string[]]$Versions=@('v11','v20','v30'), [string]$Build='', [string]$Models='')
+# -Build v40 runs every slot on build\v40; -Models 'v30=openai/gpt-6-luna;v31=...' sets Ai__Model per slot (default gpt-6-luna).
+$model=@{}; foreach($p in ($Models -split ';' | Where-Object { $_ })){ $kv=$p -split '=',2; $model[$kv[0].Trim()]=$kv[1].Trim() }
 # Starts the proxy and the three backends from E:\ANGI-Agent-Eval only.
 # APPDATA points at an empty folder, so the developer's user secrets are never loaded.
 $R='E:\ANGI-Agent-Eval'
@@ -34,7 +36,7 @@ foreach($v in $Versions){
     Recommendation__ApiKey=$s.RECO_KEY
     Ai__BaseUrl="http://127.0.0.1:18100/run/$v/v1/"
     Ai__ApiKey=$apiKey
-    Ai__Model='gpt-6-luna'
+    Ai__Model=$(if($model[$v]){ $model[$v] } else { 'gpt-6-luna' })
     Agent__MessagesPerMinute='1000'
     Agent__MessagesPerDay='100000'
     Agent__ReasoningEffort='none'
@@ -51,7 +53,8 @@ foreach($v in $Versions){
     Cloudinary__ApiSecret='disabled'
   }
   foreach($k in $e.Keys){ Set-Item "env:$k" $e[$k] }
-  $pids+=(Start-Process "$R\build\$v\ANGI.WebApi.exe" -WorkingDirectory "$R\build\$v" -WindowStyle Hidden -PassThru -RedirectStandardOutput "$run\backend-$v.out" -RedirectStandardError "$run\backend-$v.err").Id
+  $b=$(if($Build){ $Build } else { $v })
+  $pids+=(Start-Process "$R\build\$b\ANGI.WebApi.exe" -WorkingDirectory "$R\build\$b" -WindowStyle Hidden -PassThru -RedirectStandardOutput "$run\backend-$v.out" -RedirectStandardError "$run\backend-$v.err").Id
 }
 $pids -join ',' | Set-Content "$run\pids.txt"
 "started pids=$($pids -join ',')"

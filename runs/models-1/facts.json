@@ -1,0 +1,30 @@
+{
+  "catalogDishes": 1040,
+  "proposals": {
+    "luna": {
+      "proposals": 105,
+      "items": 927,
+      "mismatched": 0,
+      "examples": []
+    },
+    "haiku": {
+      "proposals": 7,
+      "items": 51,
+      "mismatched": 0,
+      "examples": []
+    },
+    "gemini": {
+      "proposals": 35,
+      "items": 261,
+      "mismatched": 0,
+      "examples": []
+    }
+  },
+  "priceUsdPerMillionTokens": {
+    "model": "gpt-6-luna",
+    "unit": "USD per million tokens",
+    "input": 0.1,
+    "cachedInput": 0.01,
+    "output": 0.5
+  }
+}

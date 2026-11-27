@@ -56,7 +56,7 @@ function checkScenario(e, st, last, problems) {
 
 // Scenario-major order: each scenario runs on every version before the next one, rotating which version goes first,
 // so a token cap reached mid-run leaves the same scenarios missing for all versions.
-const tokens = {};
+const tokens = {}, COST_CAPS = JSON.parse(process.env.EVAL_COST_CAPS || '{}');
 async function freshToken(v) {
   const login = await api(`http://127.0.0.1:${PORTS[v]}`, '/api/v1/auth/login', null, cfg.user);
   if (!login.ok) throw new Error(`${v} login failed: ${login.http} ${login.errorCode}`);
@@ -67,6 +67,9 @@ for (let rep = 1; rep <= repeats && !stopped; rep++) {
   for (const [si, s] of scenarios.entries()) {
     const st0 = await fetch(`${PROXY}/__stats`).then(r => r.json()).catch(() => ({}));
     if (st0.cap > 0 && st0.used >= st0.cap * 0.95) { console.log(`STOP: token cap nearly reached (${st0.used}/${st0.cap}) before ${s.id}`); stopped = true; break; }
+    // Model comparison (EVAL_COST_CAPS, USD per route): stop before a scenario rather than let a cap fail it halfway.
+    const capHit = versions.find(v => COST_CAPS[v] && (st0.spent?.[v] || 0) >= COST_CAPS[v] * 0.95);
+    if (capHit) { console.log(`STOP: cost cap nearly reached for ${capHit} (USD ${st0.spent[capHit].toFixed(3)}/${COST_CAPS[capHit]}) before ${s.id}, repeat ${rep}`); stopped = true; break; }
     const order = versions.map((_, i) => versions[(i + si + rep - 1) % versions.length]);
     for (const v of order) {
     const base = `http://127.0.0.1:${PORTS[v]}`;

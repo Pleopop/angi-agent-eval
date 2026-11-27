@@ -1,0 +1,356 @@
+{
+  "runId": "models-1",
+  "models": {
+    "luna": "openai/gpt-6-luna",
+    "haiku": "anthropic/claude-haiku-5.5",
+    "gemini": "google/gemini-3.1-flash-lite"
+  },
+  "sameConditionsRepeat1": {
+    "luna": {
+      "runs": 36,
+      "passed": 33,
+      "passRate": 91.7,
+      "turns": 80,
+      "failedTurns": 0,
+      "failedTurnRate": 0,
+      "failedByCode": {},
+      "calls": 218,
+      "inputTokens": 4041810,
+      "cachedTokens": 2680324,
+      "outputTokens": 55054,
+      "costUsd": 0.2243,
+      "costPerRunUsd": 0.00623,
+      "costPerPassedRunUsd": 0.0068,
+      "tokensPerRun": 113802,
+      "turnMsMedian": 8696,
+      "turnMsP95": 16843,
+      "byKind": {
+        "chat": {
+          "runs": 3,
+          "passed": 3
+        },
+        "scope": {
+          "runs": 3,
+          "passed": 3
+        },
+        "suggest": {
+          "runs": 4,
+          "passed": 4
+        },
+        "plan": {
+          "runs": 4,
+          "passed": 4
+        },
+        "edit": {
+          "runs": 5,
+          "passed": 5
+        },
+        "save": {
+          "runs": 3,
+          "passed": 3
+        },
+        "area": {
+          "runs": 7,
+          "passed": 6
+        },
+        "conversation": {
+          "runs": 7,
+          "passed": 5
+        }
+      }
+    },
+    "haiku": {
+      "runs": 36,
+      "passed": 14,
+      "passRate": 38.9,
+      "turns": 95,
+      "failedTurns": 19,
+      "failedTurnRate": 20,
+      "failedByCode": {
+        "AGENT_UNAVAILABLE": 19
+      },
+      "calls": 274,
+      "inputTokens": 7074194,
+      "cachedTokens": 848744,
+      "outputTokens": 121932,
+      "costUsd": 0.8476,
+      "costPerRunUsd": 0.02354,
+      "costPerPassedRunUsd": 0.06054,
+      "tokensPerRun": 199892,
+      "turnMsMedian": 5704,
+      "turnMsP95": 15694,
+      "byKind": {
+        "chat": {
+          "runs": 3,
+          "passed": 3
+        },
+        "scope": {
+          "runs": 3,
+          "passed": 2
+        },
+        "suggest": {
+          "runs": 4,
+          "passed": 4
+        },
+        "plan": {
+          "runs": 4,
+          "passed": 2
+        },
+        "edit": {
+          "runs": 5,
+          "passed": 1
+        },
+        "save": {
+          "runs": 3,
+          "passed": 0
+        },
+        "area": {
+          "runs": 7,
+          "passed": 2
+        },
+        "conversation": {
+          "runs": 7,
+          "passed": 0
+        }
+      }
+    },
+    "gemini": {
+      "runs": 36,
+      "passed": 25,
+      "passRate": 69.4,
+      "turns": 82,
+      "failedTurns": 7,
+      "failedTurnRate": 8.5,
+      "failedByCode": {
+        "AGENT_UNAVAILABLE": 7
+      },
+      "calls": 329,
+      "inputTokens": 7651628,
+      "cachedTokens": 1730544,
+      "outputTokens": 106965,
+      "costUsd": 1.684,
+      "costPerRunUsd": 0.04678,
+      "costPerPassedRunUsd": 0.06736,
+      "tokensPerRun": 215516,
+      "turnMsMedian": 9741,
+      "turnMsP95": 21209,
+      "byKind": {
+        "chat": {
+          "runs": 3,
+          "passed": 3
+        },
+        "scope": {
+          "runs": 3,
+          "passed": 3
+        },
+        "suggest": {
+          "runs": 4,
+          "passed": 4
+        },
+        "plan": {
+          "runs": 4,
+          "passed": 4
+        },
+        "edit": {
+          "runs": 5,
+          "passed": 4
+        },
+        "save": {
+          "runs": 3,
+          "passed": 2
+        },
+        "area": {
+          "runs": 7,
+          "passed": 4
+        },
+        "conversation": {
+          "runs": 7,
+          "passed": 1
+        }
+      }
+    }
+  },
+  "allRunsWithoutOpenRouterRefusals": {
+    "luna": {
+      "runs": 98,
+      "passed": 90,
+      "passRate": 91.8,
+      "turns": 209,
+      "failedTurns": 1,
+      "failedTurnRate": 0.5,
+      "failedByCode": {
+        "AGENT_UNAVAILABLE": 1
+      },
+      "calls": 574,
+      "inputTokens": 10543080,
+      "cachedTokens": 7478570,
+      "outputTokens": 160608,
+      "costUsd": 0.5375,
+      "costPerRunUsd": 0.00548,
+      "costPerPassedRunUsd": 0.00597,
+      "tokensPerRun": 109221,
+      "turnMsMedian": 8101,
+      "turnMsP95": 16843,
+      "byKind": {
+        "chat": {
+          "runs": 9,
+          "passed": 9
+        },
+        "scope": {
+          "runs": 9,
+          "passed": 9
+        },
+        "suggest": {
+          "runs": 10,
+          "passed": 10
+        },
+        "plan": {
+          "runs": 11,
+          "passed": 11
+        },
+        "edit": {
+          "runs": 14,
+          "passed": 13
+        },
+        "save": {
+          "runs": 8,
+          "passed": 8
+        },
+        "area": {
+          "runs": 20,
+          "passed": 18
+        },
+        "conversation": {
+          "runs": 17,
+          "passed": 12
+        }
+      }
+    },
+    "haiku": {
+      "runs": 36,
+      "passed": 14,
+      "passRate": 38.9,
+      "turns": 95,
+      "failedTurns": 19,
+      "failedTurnRate": 20,
+      "failedByCode": {
+        "AGENT_UNAVAILABLE": 19
+      },
+      "calls": 274,
+      "inputTokens": 7074194,
+      "cachedTokens": 848744,
+      "outputTokens": 121932,
+      "costUsd": 0.8476,
+      "costPerRunUsd": 0.02354,
+      "costPerPassedRunUsd": 0.06054,
+      "tokensPerRun": 199892,
+      "turnMsMedian": 5704,
+      "turnMsP95": 15694,
+      "byKind": {
+        "chat": {
+          "runs": 3,
+          "passed": 3
+        },
+        "scope": {
+          "runs": 3,
+          "passed": 2
+        },
+        "suggest": {
+          "runs": 4,
+          "passed": 4
+        },
+        "plan": {
+          "runs": 4,
+          "passed": 2
+        },
+        "edit": {
+          "runs": 5,
+          "passed": 1
+        },
+        "save": {
+          "runs": 3,
+          "passed": 0
+        },
+        "area": {
+          "runs": 7,
+          "passed": 2
+        },
+        "conversation": {
+          "runs": 7,
+          "passed": 0
+        }
+      }
+    },
+    "gemini": {
+      "runs": 36,
+      "passed": 25,
+      "passRate": 69.4,
+      "turns": 82,
+      "failedTurns": 7,
+      "failedTurnRate": 8.5,
+      "failedByCode": {
+        "AGENT_UNAVAILABLE": 7
+      },
+      "calls": 329,
+      "inputTokens": 7651628,
+      "cachedTokens": 1730544,
+      "outputTokens": 106965,
+      "costUsd": 1.684,
+      "costPerRunUsd": 0.04678,
+      "costPerPassedRunUsd": 0.06736,
+      "tokensPerRun": 215516,
+      "turnMsMedian": 9741,
+      "turnMsP95": 21209,
+      "byKind": {
+        "chat": {
+          "runs": 3,
+          "passed": 3
+        },
+        "scope": {
+          "runs": 3,
+          "passed": 3
+        },
+        "suggest": {
+          "runs": 4,
+          "passed": 4
+        },
+        "plan": {
+          "runs": 4,
+          "passed": 4
+        },
+        "edit": {
+          "runs": 5,
+          "passed": 4
+        },
+        "save": {
+          "runs": 3,
+          "passed": 2
+        },
+        "area": {
+          "runs": 7,
+          "passed": 4
+        },
+        "conversation": {
+          "runs": 7,
+          "passed": 1
+        }
+      }
+    }
+  },
+  "openRouterRefusedRuns": {
+    "luna": [
+      "luna|suggest-price|2",
+      "luna|suggest-name|2",
+      "luna|plan-full|2",
+      "luna|xadan-buffet|2",
+      "luna|c13-add-named-dish|2",
+      "luna|c17-drink-and-budget|2",
+      "luna|c19-two-dishes-one-meal|2",
+      "luna|c21-replace-and-remove|2",
+      "luna|edit-add-meal|3",
+      "luna|save-confirm|3"
+    ],
+    "haiku": [],
+    "gemini": []
+  }
+}

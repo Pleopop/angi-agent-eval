@@ -1,0 +1,67 @@
+﻿Run:        runs\models-1
+  v30: openai/gpt-6-luna  36 x 3 run(s), cap USD 0.9
+  v31: anthropic/claude-haiku-5.5  36 x 1 run(s), cap USD 1.4
+  v40: google/gemini-3.1-flash-lite  36 x 1 run(s), cap USD 1.9
+
+== Fresh databases and reco containers
+v30 restore_errors=0
+v31 restore_errors=0
+v40 restore_errors=0
+angi-eval-reco-v40 Up 6 seconds 127.0.0.1:18115->8000/tcp
+angi-eval-reco-v31 Up 7 seconds 127.0.0.1:18114->8000/tcp
+angi-eval-reco-v30 Up 9 seconds 127.0.0.1:18113->8000/tcp
+angi-eval-reco-v20 Up 17 hours 127.0.0.1:18112->8000/tcp
+angi-eval-reco-v11 Up 17 hours 127.0.0.1:18111->8000/tcp
+angi-eval-pg Up 36 hours 127.0.0.1:55432->5432/tcp
+
+== Clear Agent conversations
+v30 conversations=0
+v31 conversations=0
+v40 conversations=0
+
+== Add the evaluation test account
+v30 test user id=511
+v31 test user id=511
+v40 test user id=511
+
+== Start backends
+started pids=8020,9052,10932,1460
+v30 healthy
+v31 healthy
+v40 healthy
+
+== Run scenarios (one process per model)
+r3 v30 c19-two-dishes-one-meal PASS turns=3 
+r3 v30 c20-kind-on-a-day  PASS turns=5 
+r3 v30 c21-replace-and-remove PASS turns=5 
+r1 v31 c19-two-dishes-one-meal FAIL turns=5 turn 1: HTTP 503 AGENT_UNAVAILABLE
+r1 v31 c20-kind-on-a-day  FAIL turns=7 turn 1: HTTP 503 AGENT_UNAVAILABLE
+r1 v31 c21-replace-and-remove FAIL turns=6 turn 1: HTTP 503 AGENT_UNAVAILABLE
+r1 v40 c19-two-dishes-one-meal FAIL turns=4 turn 3: HTTP 503 AGENT_UNAVAILABLE; turn 4: HTTP 503 AGENT_UNAVAILABLE
+r1 v40 c20-kind-on-a-day  PASS turns=5 
+r1 v40 c21-replace-and-remove PASS turns=5 
+
+== Rescore against the catalog and the stored drafts
+
+== Billed cost per model
+v30 openai/gpt-6-luna OpenAI passed 90/108 USD 0.549596 errors 18
+v31 anthropic/claude-haiku-5.5 Anthropic passed 14/36 USD 0.847594 errors 0
+v40 google/gemini-3.1-flash-lite Google passed 25/36 USD 1.683982 errors 0
+
+== Report
+# Evaluation report: models-1
+
+Scenario runs: 180. Model calls: 1224. Calls without a scenario: 0. Calls with mismatched route: 0.
+
+| Version | Passed | Pass rate | Turns | Failed turns | Model calls | Input tokens | Cached | Output tokens | Total tokens | Tokens per scenario | Tokens per passed scenario | Median turn s | P90 turn s |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| v30 | 90/108 | 83.3% | 245 | 19 | 621 | 10,867,155 | 7,755,368 | 167,527 | 11,034,682 | 102,173 | 122,608 | 7.5 | 14.6 |
+| v31 | 14/36 | 38.9% | 95 | 19 | 274 | 7,074,194 | 848,744 | 121,932 | 7,196,126 | 199,892 | 514,009 | 5.9 | 12.8 |
+| v40 | 25/36 | 69.4% | 82 | 7 | 329 | 7,651,628 | 1,730,544 | 106,965 | 7,758,593 | 215,516 | 310,344 | 10.1 | 18.0 |
+
+## By scenario kind
+
+== Stop services
+stopped
+
+Done. Results: E:\ANGI-Agent-Eval\runs\models-1

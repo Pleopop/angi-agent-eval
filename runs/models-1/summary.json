@@ -1,0 +1,44 @@
+[
+  {
+    "version": "gemini",
+    "scenarios": 36,
+    "passed": 25,
+    "turns": 82,
+    "failedTurns": 7,
+    "calls": 329,
+    "input": 7651628,
+    "cached": 1730544,
+    "output": 106965,
+    "total": 7758593,
+    "medianMs": 10106,
+    "p90Ms": 18041
+  },
+  {
+    "version": "haiku",
+    "scenarios": 36,
+    "passed": 14,
+    "turns": 95,
+    "failedTurns": 19,
+    "calls": 274,
+    "input": 7074194,
+    "cached": 848744,
+    "output": 121932,
+    "total": 7196126,
+    "medianMs": 5866,
+    "p90Ms": 12788
+  },
+  {
+    "version": "luna",
+    "scenarios": 108,
+    "passed": 90,
+    "turns": 245,
+    "failedTurns": 19,
+    "calls": 621,
+    "input": 10867155,
+    "cached": 7755368,
+    "output": 167527,
+    "total": 11034682,
+    "medianMs": 7501,
+    "p90Ms": 14586
+  }
+]
