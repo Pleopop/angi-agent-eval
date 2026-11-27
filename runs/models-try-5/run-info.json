@@ -1,0 +1,32 @@
+﻿{
+    "runId":  "models-try-5",
+    "startedAt":  "2026-11-27T12:29:12.6481000+07:00",
+    "mode":  "live",
+    "upstream":  "openrouter",
+    "agentCode":  "V4.0 (16efd35), build\\v40 in every slot",
+    "models":  {
+                   "v30":  "openai/gpt-6-luna",
+                   "v31":  "anthropic/claude-haiku-5.5",
+                   "v40":  "google/gemini-3.1-flash-lite"
+               },
+    "costCapsUsd":  {
+                        "v30":  0.05,
+                        "v31":  0.1,
+                        "v40":  0.15
+                    },
+    "reasoningEffort":  "none",
+    "providerPinning":  "openai -\u003e OpenAI, anthropic -\u003e Anthropic (top-level automatic prompt caching), google -\u003e Google AI Studio; no fallbacks",
+    "seedDump":  "angi-prod-sync-20261123.dump",
+    "seedDumpSha256":  "5e3238a8893fc5d19dac7b6a7a53dd7e5d8a723a85613c10b3480ecde07c6369",
+    "claudeAdaptation":  "response_format json_schema -\u003e json_object + the same schema as a system message; tool strict off (Anthropic limit: 16 union parameters, ANGI has 39)",
+    "geminiAdaptation":  "response_format left out on forced tool calls only (Gemini rejects forced function calling with a JSON response type)",
+    "scenarios":  [
+                      "plan-full",
+                      "edit-add-dish"
+                  ],
+    "repeats":  {
+                    "v31":  1,
+                    "v40":  1,
+                    "v30":  1
+                }
+}

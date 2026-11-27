@@ -1,0 +1,134 @@
+﻿{
+ "v30": {
+  "scenarios": 108,
+  "passed": 90,
+  "checks": 111,
+  "checksPassed": 83,
+  "setupFailed": 3,
+  "turns": 245,
+  "formatOkTurns": 225,
+  "faithfulTurns": 245,
+  "dishClaims": 457,
+  "dishClaimsVerified": 457,
+  "falseSaves": 0,
+  "slotTurns": 0,
+  "proposalItems": 927,
+  "proposalItemsMismatched": 0,
+  "calls": 621,
+  "inputTokens": 10867155,
+  "cachedTokens": 7755368,
+  "outputTokens": 167527,
+  "totalTokens": 11034682,
+  "outputTokensPerScenario": 1551.1759259259259,
+  "tokensPerScenario": 102172.98148148147,
+  "turnMsMedian": 7501,
+  "turnMsP95": 16667,
+  "costUsd": 0.472496,
+  "costPerScenarioUsd": 0.004375
+ },
+ "v31": {
+  "scenarios": 36,
+  "passed": 14,
+  "checks": 37,
+  "checksPassed": 8,
+  "setupFailed": 7,
+  "turns": 95,
+  "formatOkTurns": 75,
+  "faithfulTurns": 93,
+  "dishClaims": 84,
+  "dishClaimsVerified": 84,
+  "falseSaves": 2,
+  "slotTurns": 0,
+  "proposalItems": 51,
+  "proposalItemsMismatched": 0,
+  "calls": 274,
+  "inputTokens": 7074194,
+  "cachedTokens": 848744,
+  "outputTokens": 121932,
+  "totalTokens": 7196126,
+  "outputTokensPerScenario": 3387,
+  "tokensPerScenario": 199892.38888888888,
+  "turnMsMedian": 5866,
+  "turnMsP95": 14522,
+  "costUsd": 0.691998,
+  "costPerScenarioUsd": 0.019222
+ },
+ "v40": {
+  "scenarios": 36,
+  "passed": 25,
+  "checks": 37,
+  "checksPassed": 21,
+  "setupFailed": 0,
+  "turns": 82,
+  "formatOkTurns": 75,
+  "faithfulTurns": 80,
+  "dishClaims": 167,
+  "dishClaimsVerified": 167,
+  "falseSaves": 2,
+  "slotTurns": 0,
+  "proposalItems": 261,
+  "proposalItemsMismatched": 0,
+  "calls": 329,
+  "inputTokens": 7651628,
+  "cachedTokens": 1730544,
+  "outputTokens": 106965,
+  "totalTokens": 7758593,
+  "outputTokensPerScenario": 2971.25,
+  "tokensPerScenario": 215516.47222222222,
+  "turnMsMedian": 9952,
+  "turnMsP95": 21209,
+  "costUsd": 0.662896,
+  "costPerScenarioUsd": 0.018414
+ }
+}
+v31 scope-math: reply contains forbidden content
+v31 plan-full [setup failed]: turn 1: HTTP 503 AGENT_UNAVAILABLE; proposal should be true
+v31 plan-tight: turn 1: HTTP 503 AGENT_UNAVAILABLE
+v31 edit-remove [setup failed]: turn 2: HTTP 503 AGENT_UNAVAILABLE; proposal should be true; reply is empty
+v31 edit-swap [setup failed]: turn 1: HTTP 503 AGENT_UNAVAILABLE; proposal should be true
+v31 edit-vague [setup failed]: turn 1: HTTP 503 AGENT_UNAVAILABLE; proposal should be true
+v31 edit-add-dish [setup failed]: turn 1: HTTP 503 AGENT_UNAVAILABLE; proposal should be true
+v40 edit-add-dish: draft check: the added dish replaced an existing one
+v31 save-confirm: turn 2: says it saved, nothing saved; turn 3: says it saved, nothing saved
+v40 save-confirm: turn 2: says it saved, nothing saved; turn 3: says it saved, nothing saved
+v31 save-refuse [setup failed]: proposal should be true
+v31 save-interjection [setup failed]: turn 1: HTTP 503 AGENT_UNAVAILABLE; proposal should be true
+v40 noido-suggest: check insideZone: dishes=10 outer=3
+v40 noithanh-suggest: check insideZone: dishes=10 outer=3
+v31 noido-plan: turn 2: HTTP 503 AGENT_UNAVAILABLE; reply is empty; check insideZone: draftItems=0 outer=0
+v31 area-nodata: turn 2: HTTP 503 AGENT_UNAVAILABLE; reply is empty
+v30 comrang-plan: check pickedFromList: wanted=415 dinnerDay1=none
+v31 comrang-plan: turn 2: HTTP 503 AGENT_UNAVAILABLE; check pickedFromList: wanted=126 dinnerDay1=none
+v31 quan-nuoc: reply is empty; check drinksOnly: dishes=0 drinks=0
+v31 xadan-buffet: check located: located=true dishes=0 km=
+v40 comrang-plan: check pickedFromList: wanted=415 dinnerDay1=127
+v31 c13-add-named-dish: turn 5: HTTP 503 AGENT_UNAVAILABLE; turn 6: HTTP 503 AGENT_UNAVAILABLE; reply is empty; check list: lines=0; check fullPlan: items=0 days=3; check adds: before=0 after=0 keptAll=true new=; check adds: before=0 after=0 keptAll=true new=
+v40 c13-add-named-dish: check fullPlan: items=0 days=3; check adds: before=0 after=0 keptAll=true new=; check adds: before=0 after=0 keptAll=true new=
+v31 c14-add-kind: check list: lines=0
+v40 c14-add-kind: check adds: before=9 after=9 keptAll=true new=
+v31 c16-add-from-list: turn 1: HTTP 503 AGENT_UNAVAILABLE; turn 2: HTTP 503 AGENT_UNAVAILABLE; check fullPlan: items=0 days=0; check adds: before=0 after=0 keptAll=true new=; check list: lines=0; check adds: before=0 after=0 keptAll=true new=
+v40 c16-add-from-list: turn 5: HTTP 503 AGENT_UNAVAILABLE; check adds: before=9 after=9 keptAll=false new=3/breakfast/265,3/lunch/189,3/dinner/538; check adds: before=9 after=9 keptAll=true new=
+v30 c17-drink-and-budget: check askMeal: Mình thêm Cà Phê nâu vào bữa phụ ngày 1 nhé, tổng giờ khoảng 920.000 đồng/người. Bạn xem lại, ổn thì mình chốt
+v31 c17-drink-and-budget: turn 6: HTTP 503 AGENT_UNAVAILABLE; turn 9: HTTP 503 AGENT_UNAVAILABLE; check fullPlan: items=0 days=3; check askMeal: Bạn đang khát nên muốn chút đồ uống cho ngày 1 đúng không? Đồ uống trên ANGI có tên như Cà Phê Đen, Chanh dây ; check adds: before=0 after=0 keptAll=true new=; check addsB: before=0 after=0 keptAll=true new=; check mainKept: newDraft=false meals=0 noMain=0 total=0
+v31 c19-two-dishes-one-meal: turn 1: HTTP 503 AGENT_UNAVAILABLE; check fullPlan: items=0 days=0; check addsTwo: before=0 after=0 keptAll=true new=
+v40 c17-drink-and-budget: turn 4: HTTP 503 AGENT_UNAVAILABLE; turn 5: HTTP 503 AGENT_UNAVAILABLE; turn 8: HTTP 503 AGENT_UNAVAILABLE; turn 9: HTTP 503 AGENT_UNAVAILABLE; reply is empty; check askMeal: Mình thêm cà phê vào bữa ăn vặt ngày 1 nhé, tổng giờ khoảng 804.000 đồng. Bạn xem lại, ổn thì mình chốt luôn n; check adds: before=10 after=10 keptAll=true new=; check addsB: before=10 after=10 keptAll=true new=; check mainKept: newDraft=false meals=10 noMain=1 total=804000
+v30 c20-kind-on-a-day: check askMeal: Mình thêm Bia sapporo vào bữa trưa ngày 1 nhé, tổng giờ khoảng 1.915.000 đồng/người. Bạn xem lại, ổn thì mình 
+v31 c20-kind-on-a-day: turn 1: HTTP 503 AGENT_UNAVAILABLE; check fullPlan: items=0 days=0; check adds: before=0 after=0 keptAll=true new=; check askMeal: Bạn muốn đi đâu và đi mấy ngày để mình lập lịch nhé? Đồ uống ở ngày 1 mình sẽ thêm sau khi có lịch.; check addsB: before=0 after=0 keptAll=true new=
+v31 c21-replace-and-remove: turn 1: HTTP 503 AGENT_UNAVAILABLE; check fullPlan: items=0 days=0; check replace:1/dinner: othersKept=true was= now=; check replaceName:2/lunch:pho: othersKept=true was= now=; check remove:3/breakfast: othersKept=true was= now=; check remove:2: othersKept=true was= now=
+v40 c19-two-dishes-one-meal: turn 3: HTTP 503 AGENT_UNAVAILABLE; turn 4: HTTP 503 AGENT_UNAVAILABLE; reply is empty; check addsTwo: before=15 after=15 keptAll=true new=
+v30 suggest-price: turn 1: HTTP 429 AGENT_UNAVAILABLE; reply misses expected wording; reply is empty
+v30 suggest-name: turn 1: HTTP 429 AGENT_UNAVAILABLE; reply misses expected wording; reply is empty
+v30 plan-full [setup failed]: turn 1: HTTP 429 AGENT_UNAVAILABLE; proposal should be true
+v40 c20-kind-on-a-day: check adds: before=15 after=15 keptAll=true new=; check addsB: before=15 after=15 keptAll=true new=
+v30 noido-suggest: check insideZone: dishes=10 outer=3
+v30 xadan-buffet: turn 1: HTTP 429 AGENT_UNAVAILABLE; reply is empty; check located: located=true dishes=0 km=
+v30 c13-add-named-dish: turn 1: HTTP 429 AGENT_UNAVAILABLE; turn 2: HTTP 429 AGENT_UNAVAILABLE; turn 3: HTTP 429 AGENT_UNAVAILABLE; turn 4: HTTP 429 AGENT_UNAVAILABLE; check list: lines=0; check fullPlan: items=0 days=0; check adds: before=0 after=0 keptAll=true new=; check adds: before=0 after=0 keptAll=true new=
+v30 c17-drink-and-budget: turn 6: HTTP 429 AGENT_UNAVAILABLE; turn 7: HTTP 429 AGENT_UNAVAILABLE; turn 8: HTTP 429 AGENT_UNAVAILABLE; turn 9: HTTP 429 AGENT_UNAVAILABLE; turn 10: HTTP 429 AGENT_UNAVAILABLE; reply is empty; check fullPlan: items=0 days=3; check askMeal: Mình hiểu bạn muốn thêm đồ uống vào lịch ngày 1. Bạn dự tính ngân sách khoảng bao nhiêu cho mỗi ngày hay cả ch; check adds: before=0 after=0 keptAll=true new=; check addsB: before=0 after=0 keptAll=true new=; check mainKept: newDraft=false meals=0 noMain=0 total=0
+v30 c19-two-dishes-one-meal: turn 1: HTTP 429 AGENT_UNAVAILABLE; check fullPlan: items=0 days=0; check list: lines=0; check addsTwo: before=0 after=0 keptAll=true new=
+v30 c20-kind-on-a-day: check adds: before=15 after=18 keptAll=true new=3/breakfast/280,3/lunch/280,3/dinner/280; check askMeal: Bạn đang muốn kèm đồ uống cho cả ba bữa ngày 1 đúng không? ANGI chưa có món tên chung là “đồ uống”; bạn muốn c; check addsB: before=21 after=21 keptAll=true new=
+v30 c21-replace-and-remove: turn 1: HTTP 429 AGENT_UNAVAILABLE; turn 2: HTTP 429 AGENT_UNAVAILABLE; check fullPlan: items=0 days=0; check replace:1/dinner: othersKept=true was= now=; check replaceName:2/lunch:pho: othersKept=true was= now=; check remove:3/breakfast: othersKept=true was= now=; check remove:2: othersKept=true was= now=
+v30 edit-swap [setup failed]: turn 1: HTTP 503 AGENT_UNAVAILABLE; proposal should be true
+v30 edit-add-meal: turn 2: HTTP 429 AGENT_UNAVAILABLE; turn 2: newProposal should be true; reply is empty
+v30 save-confirm [setup failed]: turn 1: HTTP 429 AGENT_UNAVAILABLE; committed should be true
+v30 c17-drink-and-budget: check askMeal: Mình thêm Cà Phê nâu vào bữa sáng ngày 1; Bia sapporo vào bữa trưa ngày 1; Bia hơi vào bữa tối ngày 1 nhé, tổn; check adds: before=12 after=12 keptAll=true new=
+v30 c20-kind-on-a-day: check askMeal: Mình thêm Cà Phê nâu vào bữa sáng ngày 1; Bia sapporo vào bữa trưa ngày 1; Bia hơi vào bữa tối ngày 1 nhé, tổn

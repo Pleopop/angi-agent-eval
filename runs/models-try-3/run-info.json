@@ -1,0 +1,26 @@
+﻿{
+    "runId":  "models-try-3",
+    "startedAt":  "2026-11-27T12:18:31.3005824+07:00",
+    "mode":  "live",
+    "upstream":  "openrouter",
+    "agentCode":  "V4.0 (16efd35), build\\v40 in every slot",
+    "models":  {
+                   "v30":  "openai/gpt-6-luna",
+                   "v31":  "anthropic/claude-haiku-5.5",
+                   "v40":  "google/gemini-3.1-flash-lite"
+               },
+    "costCapsUsd":  {
+                        "v30":  0.1,
+                        "v31":  0.2,
+                        "v40":  0.2
+                    },
+    "reasoningEffort":  "none",
+    "providerPinning":  "openai -\u003e OpenAI, anthropic -\u003e Anthropic (top-level automatic prompt caching), google -\u003e Google AI Studio; no fallbacks",
+    "seedDump":  "angi-prod-sync-20261123.dump",
+    "seedDumpSha256":  "5e3238a8893fc5d19dac7b6a7a53dd7e5d8a723a85613c10b3480ecde07c6369",
+    "scenarios":  [
+                      "plan-full",
+                      "edit-add-dish"
+                  ],
+    "repeats":  1
+}

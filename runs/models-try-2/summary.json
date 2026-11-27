@@ -1,0 +1,44 @@
+[
+  {
+    "version": "v30",
+    "scenarios": 1,
+    "passed": 1,
+    "turns": 2,
+    "failedTurns": 0,
+    "calls": 8,
+    "input": 152378,
+    "cached": 129766,
+    "output": 2189,
+    "total": 154567,
+    "medianMs": 14157,
+    "p90Ms": 14157
+  },
+  {
+    "version": "v31",
+    "scenarios": 1,
+    "passed": 0,
+    "turns": 2,
+    "failedTurns": 2,
+    "calls": 2,
+    "input": 0,
+    "cached": 0,
+    "output": 0,
+    "total": 0,
+    "medianMs": 1824,
+    "p90Ms": 1824
+  },
+  {
+    "version": "v40",
+    "scenarios": 1,
+    "passed": 0,
+    "turns": 2,
+    "failedTurns": 2,
+    "calls": 4,
+    "input": 15365,
+    "cached": 10721,
+    "output": 731,
+    "total": 16096,
+    "medianMs": 3513,
+    "p90Ms": 3513
+  }
+]
