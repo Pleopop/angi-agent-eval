@@ -83,7 +83,11 @@ try {
   foreach ($v in $vs) { Get-Content "$run\run-$v.log" -Tail 3 }
   Step 'Rescore against the catalog and the stored drafts' { & node "$R\tools\rescore.mjs" $RunId > "$run\rescore.log" }
   Step 'Billed cost per model' { & node "$R\tools\model-cost.mjs" $RunId }
+  # Slot labels v30/v31/v40 are only infrastructure; results are labelled by model (mapping kept in run-info.json "slots").
+  $labels = ($vs | ForEach-Object { "$_=" + (($model[$_] -split '/')[-1] -replace '^gpt-6-', '' -replace '^claude-', '' -replace '-[\d.]+$', '' -replace '-[\d.]+-.*$', '') }) -join ','
+  Step 'Label results by model' { & node "$R\tools\relabel-run.mjs" $RunId $labels }
   Step 'Report' { & node "$R\tools\report.mjs" $RunId }
+  Step 'Comparison table' { & node "$R\tools\model-table.mjs" $RunId > $null }
 }
 finally {
   Remove-Item Env:EVAL_OPENAI_KEY, Env:EVAL_MAPBOX_TOKEN, Env:EVAL_ALLOW_PAID, Env:VERSIONS, Env:EVAL_UPSTREAM, Env:EVAL_COST_CAPS -ErrorAction SilentlyContinue

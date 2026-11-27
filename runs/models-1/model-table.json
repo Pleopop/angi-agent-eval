@@ -1,12 +1,12 @@
 {
   "runId": "models-1",
   "models": {
-    "v30": "openai/gpt-6-luna",
-    "v31": "anthropic/claude-haiku-5.5",
-    "v40": "google/gemini-3.1-flash-lite"
+    "luna": "openai/gpt-6-luna",
+    "haiku": "anthropic/claude-haiku-5.5",
+    "gemini": "google/gemini-3.1-flash-lite"
   },
   "sameConditionsRepeat1": {
-    "v30": {
+    "luna": {
       "runs": 36,
       "passed": 33,
       "passRate": 91.7,
@@ -59,7 +59,7 @@
         }
       }
     },
-    "v31": {
+    "haiku": {
       "runs": 36,
       "passed": 14,
       "passRate": 38.9,
@@ -114,7 +114,7 @@
         }
       }
     },
-    "v40": {
+    "gemini": {
       "runs": 36,
       "passed": 25,
       "passRate": 69.4,
@@ -171,7 +171,7 @@
     }
   },
   "allRunsWithoutOpenRouterRefusals": {
-    "v30": {
+    "luna": {
       "runs": 98,
       "passed": 90,
       "passRate": 91.8,
@@ -226,7 +226,7 @@
         }
       }
     },
-    "v31": {
+    "haiku": {
       "runs": 36,
       "passed": 14,
       "passRate": 38.9,
@@ -281,7 +281,7 @@
         }
       }
     },
-    "v40": {
+    "gemini": {
       "runs": 36,
       "passed": 25,
       "passRate": 69.4,
@@ -338,19 +338,19 @@
     }
   },
   "openRouterRefusedRuns": {
-    "v30": [
-      "v30|suggest-price|2",
-      "v30|suggest-name|2",
-      "v30|plan-full|2",
-      "v30|xadan-buffet|2",
-      "v30|c13-add-named-dish|2",
-      "v30|c17-drink-and-budget|2",
-      "v30|c19-two-dishes-one-meal|2",
-      "v30|c21-replace-and-remove|2",
-      "v30|edit-add-meal|3",
-      "v30|save-confirm|3"
+    "luna": [
+      "luna|suggest-price|2",
+      "luna|suggest-name|2",
+      "luna|plan-full|2",
+      "luna|xadan-buffet|2",
+      "luna|c13-add-named-dish|2",
+      "luna|c17-drink-and-budget|2",
+      "luna|c19-two-dishes-one-meal|2",
+      "luna|c21-replace-and-remove|2",
+      "luna|edit-add-meal|3",
+      "luna|save-confirm|3"
     ],
-    "v31": [],
-    "v40": []
+    "haiku": [],
+    "gemini": []
   }
 }

@@ -1,5 +1,5 @@
-﻿{
- "v30": {
+{
+ "luna": {
   "scenarios": 1,
   "passed": 1,
   "checks": 0,
@@ -26,7 +26,7 @@
   "costUsd": 0.004103,
   "costPerScenarioUsd": 0.004103
  },
- "v31": {
+ "haiku": {
   "scenarios": 1,
   "passed": 0,
   "checks": 0,
@@ -53,7 +53,7 @@
   "costUsd": 0,
   "costPerScenarioUsd": 0
  },
- "v40": {
+ "gemini": {
   "scenarios": 1,
   "passed": 0,
   "checks": 0,
@@ -81,5 +81,5 @@
   "costPerScenarioUsd": 0.021475
  }
 }
-v31 edit-add-dish [setup failed]: turn 1: HTTP 503 AGENT_UNAVAILABLE; turn 2: HTTP 503 AGENT_UNAVAILABLE; proposal should be true; reply is empty
-v40 edit-add-dish: draft check: the added dish replaced an existing one
+haiku edit-add-dish [setup failed]: turn 1: HTTP 503 AGENT_UNAVAILABLE; turn 2: HTTP 503 AGENT_UNAVAILABLE; proposal should be true; reply is empty
+gemini edit-add-dish: draft check: the added dish replaced an existing one

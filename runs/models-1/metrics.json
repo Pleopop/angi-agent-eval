@@ -1,5 +1,5 @@
 {
-  "v30": {
+  "luna": {
     "scenarios": 108,
     "passed": 90,
     "checks": 111,
@@ -34,7 +34,7 @@
     "httpErrors": 18,
     "callsTruncated": 1
   },
-  "v31": {
+  "haiku": {
     "scenarios": 36,
     "passed": 14,
     "checks": 37,
@@ -69,7 +69,7 @@
     "httpErrors": 0,
     "callsTruncated": 0
   },
-  "v40": {
+  "gemini": {
     "scenarios": 36,
     "passed": 25,
     "checks": 37,

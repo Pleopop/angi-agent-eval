@@ -1,0 +1,2 @@
+r1 gemini plan-full          PASS turns=1 
+r1 gemini edit-add-dish      FAIL turns=2 turn 2: HTTP 503 AGENT_UNAVAILABLE; turn 2: newProposal should be true

@@ -1,19 +1,19 @@
 {
   "catalogDishes": 1040,
   "proposals": {
-    "v30": {
+    "luna": {
       "proposals": 105,
       "items": 927,
       "mismatched": 0,
       "examples": []
     },
-    "v31": {
+    "haiku": {
       "proposals": 7,
       "items": 51,
       "mismatched": 0,
       "examples": []
     },
-    "v40": {
+    "gemini": {
       "proposals": 35,
       "items": 261,
       "mismatched": 0,

@@ -1,0 +1,2 @@
+r1 haiku plan-full          FAIL turns=2 turn 1: HTTP 503 AGENT_UNAVAILABLE; proposal should be true
+r1 haiku edit-add-dish      FAIL turns=2 turn 1: HTTP 503 AGENT_UNAVAILABLE; proposal should be true
