@@ -1,0 +1,29 @@
+{
+  "v30": {
+    "scenarios": 86,
+    "passed": 82,
+    "checks": 96,
+    "checksPassed": 92,
+    "setupFailed": 0,
+    "turns": 180,
+    "formatOkTurns": 180,
+    "faithfulTurns": 180,
+    "dishClaims": 341,
+    "dishClaimsVerified": 341,
+    "falseSaves": 0,
+    "slotTurns": 0,
+    "proposalItems": 925,
+    "proposalItemsMismatched": 0,
+    "calls": 551,
+    "inputTokens": 10571310,
+    "cachedTokens": 7871228,
+    "outputTokens": 146061,
+    "totalTokens": 10717371,
+    "outputTokensPerScenario": 1698.3837209302326,
+    "tokensPerScenario": 124620.59302325582,
+    "turnMsMedian": 7805,
+    "turnMsP95": 19012,
+    "costUsd": 0.421751,
+    "costPerScenarioUsd": 0.004904
+  }
+}

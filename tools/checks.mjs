@@ -68,13 +68,22 @@ export function makeChecks(catalog) {
     for (const c of chains) {
       const first = c.turns[0], end = c.turns.at(-1), reply = end.reply || '';
       let pass = false, note = '';
-      if (/^(replace|replaceName|remove):/.test(c.tag)) {
+      if (/^(replace|replaceName|replaceOne|replaceKorean|remove):/.test(c.tag)) {
         const [kind, where, want] = c.tag.split(':'), [day, meal] = where.split('/');
         const at = i => String(i.dayNumber) === day && (!meal || i.mealSlot === meal);
         const before = items(first.before), after = items(end.after);
         const othersKept = JSON.stringify(before.filter(i => !at(i)).map(key).sort()) === JSON.stringify(after.filter(i => !at(i)).map(key).sort());
         const was = before.filter(at), now = after.filter(at);
-        if (kind === 'remove') pass = othersKept && was.length > 0 && now.length === 0;
+        // replaceOne: exactly one dish of the meal changes, the meal's other dishes stay, and the reply names the new dish (conversation 128 swapped both).
+        const changedHere = now.filter(i => !was.some(w => w.dishId === i.dishId)).length;
+        // replaceKorean: one dish of the meal becomes a Korean dish (conversation 131 got chả ốc hấp lá bưởi for "món Hàn").
+        const KOREAN = /hàn quốc|han quoc|kimbap|kimchi|tteok|tokbokki|bibimbap|bulgogi|jjajang|jolmyeon|ramyeon|분식|bbq|korea/i;
+        const added = now.filter(i => !was.some(w => w.dishId === i.dishId));
+        if (kind === 'replaceKorean') pass = othersKept && was.length > 0 && now.length === was.length && added.length === 1 &&
+          KOREAN.test(`${added[0].dishName ?? ''} ${byId.get(added[0].dishId)?.restaurant ?? ''}`);
+        else if (kind === 'replaceOne') pass = othersKept && was.length > 1 && now.length === was.length && changedHere === 1 &&
+          now.some(i => plain(i.dishName).includes(want)) && plain(end.reply).includes(want);
+        else if (kind === 'remove') pass = othersKept && was.length > 0 && now.length === 0;
         else pass = othersKept && was.length > 0 && now.length === was.length && now.some(i => !was.some(w => w.dishId === i.dishId)) &&
           (kind === 'replace' || now.some(i => plain(i.dishName).includes(want)));
         out.push({ tag: c.tag, pass, note: `othersKept=${othersKept} was=${was.map(i => i.dishName).join('|')} now=${now.map(i => i.dishName).join('|')}` });
@@ -83,13 +92,28 @@ export function makeChecks(catalog) {
       switch (c.tag) {
         case 'fullPlan': { const n = items(end.after).length, days = end.after?.numDays ?? 0; pass = days >= 3 && n >= days * 3; note = `items=${n} days=${days}`; break; }
         case 'list': { const n = (reply.match(/^- /gm) || []).length; pass = n >= 2; note = `lines=${n}`; break; }
-        case 'adds': case 'addsB': case 'addsTwo': {
+        case 'adds': case 'addsB': case 'addsKind': case 'addsTwo': {
           const base = items(first.before).map(key), result = items(end.after).map(key);
           const kept = base.every(k => { const i = result.indexOf(k); if (i < 0) return false; result.splice(i, 1); return true; });
           const want = c.tag === 'addsTwo' ? 2 : 1;
           const placed = c.tag !== 'addsTwo' || result.every(k => k.startsWith('3/lunch/'));
           pass = kept && placed && items(end.after).length === items(first.before).length + want;
           note = `before=${items(first.before).length} after=${items(end.after).length} keptAll=${kept} new=${result.join(',')}`; break; }
+        // totalUp: "còn chưa nổi 1/3 ngân sách" makes a new draft that costs more (conversation 131 went from 978k to 503k).
+        case 'totalUp': {
+          const sum = s => items(s).reduce((a, i) => a + (Number(i.price) || 0), 0), before = sum(first.before), after = sum(end.after);
+          pass = c.turns.some(x => x.newDraft) && after > before; note = `before=${before} after=${after}`; break; }
+        // notFromOffered: a plan asked by taste right after a suggestion list is not built from that list (conversation 109).
+        case 'notFromOffered': {
+          const offered = new Set(t.slice(0, t.indexOf(first)).flatMap(turn => offeredIn(turn)));
+          const d = items(end.after), overlap = d.filter(i => offered.has(i.dishId)).length;
+          pass = d.length >= 9 && overlap <= 2; note = `items=${d.length} fromOffered=${overlap}`; break; }
+        // days4: "thêm ngày thứ 4" extends the plan to four days at once.
+        case 'days4': {
+          const d = items(end.after), days = new Set(d.map(i => i.dayNumber));
+          pass = (end.after?.numDays ?? 0) === 4 && days.size === 4; note = `numDays=${end.after?.numDays} daysWithDishes=${days.size}`; break; }
+        // newDraft: the turn makes a new draft and never says it could not update (2 of 5 runs after a day was added, 2026-11-27).
+        case 'newDraft': pass = c.turns.some(x => x.newDraft) && !/chưa (thể )?cập nhật/iu.test(reply); note = reply.slice(0, 110); break;
         case 'askMeal': pass = !c.turns.some(x => x.newDraft) && /bữa/iu.test(reply) && /\?/.test(reply); note = reply.slice(0, 110); break;
         case 'mainKept': {
           const d = items(end.after), meals = [...new Set(d.map(i => i.dayNumber + '/' + i.mealSlot))];

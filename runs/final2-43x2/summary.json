@@ -1,0 +1,16 @@
+[
+  {
+    "version": "v30",
+    "scenarios": 86,
+    "passed": 82,
+    "turns": 180,
+    "failedTurns": 0,
+    "calls": 551,
+    "input": 10571310,
+    "cached": 7871228,
+    "output": 146061,
+    "total": 10717371,
+    "medianMs": 7817,
+    "p90Ms": 17552
+  }
+]

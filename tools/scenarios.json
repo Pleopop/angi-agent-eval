@@ -668,16 +668,7 @@
         },
         {
           "text": "tôi hơi khát cho tôi chút đồ uống vào ngày 1",
-          "tag": "askMeal"
-        },
-        {
-          "text": "bữa trưa",
           "tag": "adds"
-        },
-        {
-          "text": "thêm giúp tôi",
-          "tag": "adds",
-          "when": "noNewDraft"
         },
         {
           "text": "thêm đồ uống vào bữa tối ngày 1",
@@ -757,7 +748,7 @@
         },
         {
           "text": "Tôi hơi khát tôi muốn kèm đồ uống ngày 1",
-          "tag": "askMeal"
+          "tag": "addsKind"
         },
         {
           "text": "kèm nước bữa trưa",
@@ -798,6 +789,129 @@
       ],
       "kind": "conversation",
       "expect": {}
+    },
+    {
+      "id": "c128-replace-one",
+      "kind": "conversation",
+      "turns": [
+        {
+          "use": "plan2"
+        },
+        {
+          "text": "thêm ramen vào bữa tối ngày 1 đi",
+          "tag": "adds"
+        },
+        {
+          "text": "Thay ramen đó bằng Ramen Shoyu, tôi không ăn lạnh được",
+          "tag": "replaceOne:1/dinner:shoyu"
+        }
+      ],
+      "expect": {}
+    },
+    {
+      "kind": "conversation",
+      "expect": {},
+      "id": "c131-korean",
+      "turns": [
+        {
+          "use": "plan2"
+        },
+        {
+          "text": "thay món bữa trưa ngày 1 bằng một món Hàn",
+          "tag": "replaceKorean:1/lunch:x"
+        }
+      ]
+    },
+    {
+      "kind": "conversation",
+      "expect": {},
+      "id": "c131-budget-more",
+      "turns": [
+        {
+          "text": "Lập lịch 3 ngày ăn ở Hà Nội, ngân sách 2 triệu cả chuyến",
+          "tag": "fullPlan"
+        },
+        {
+          "text": "lập lịch luôn nhé",
+          "tag": "fullPlan",
+          "when": "noProposal"
+        },
+        {
+          "text": "Đa dạng hơn xem nào, còn chưa nổi 1/3 ngân sách",
+          "tag": "totalUp"
+        }
+      ]
+    },
+    {
+      "kind": "conversation",
+      "expect": {},
+      "id": "c109-spicy-after-specialty",
+      "turns": [
+        {
+          "text": "Tôi mới từ quê lên, Hà Nội có món gì ngon mà không nơi nào có không?",
+          "tag": "list"
+        },
+        {
+          "text": "Vậy lập lịch cho tôi 3 ngày, tôi muốn ăn cay ở Hà Nội",
+          "tag": "notFromOffered"
+        }
+      ]
+    },
+    {
+      "kind": "conversation",
+      "expect": {},
+      "id": "c-extend-then-budget",
+      "turns": [
+        {
+          "text": "lập lịch ăn ở Hà Nội 3 ngày",
+          "tag": "fullPlan"
+        },
+        {
+          "text": "lập lịch luôn nhé",
+          "tag": "fullPlan",
+          "when": "noProposal"
+        },
+        {
+          "text": "thêm ngày thứ 4 đi",
+          "tag": "days4"
+        },
+        {
+          "text": "ngân sách 200 nghìn mỗi ngày",
+          "tag": "newDraft"
+        }
+      ]
+    },
+    {
+      "kind": "conversation",
+      "expect": {},
+      "id": "c-province-names",
+      "turns": [
+        {
+          "text": "lập lịch 3 ngày đi ăn ở thủ đô",
+          "tag": "fullPlan"
+        },
+        {
+          "text": "lập lịch luôn nhé",
+          "tag": "fullPlan",
+          "when": "noProposal"
+        }
+      ]
+    },
+    {
+      "kind": "conversation",
+      "expect": {},
+      "id": "c-province-hanoi",
+      "turns": [
+        {
+          "text": "lập lịch 3 ngày đi ăn ở Hanoi",
+          "tag": "fullPlan"
+        },
+        {
+          "text": "lập lịch luôn nhé",
+          "tag": "fullPlan",
+          "when": "noProposal"
+        }
+      ]
     }
   ]
 }
